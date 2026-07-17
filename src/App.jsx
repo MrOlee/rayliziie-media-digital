@@ -67,8 +67,8 @@ const App = () => {
     return (
         <div className="min-h-screen bg-slate-900 text-slate-100 font-sans selection:bg-indigo-600 selection:text-white antialiased">
             
-            {/* Header */}
-            <header className="sticky top-0 z-50 border-b border-slate-850 bg-slate-900/95 backdrop-blur-md">
+            {/* Header dengan Tombol Aktif */}
+            <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-900/95 backdrop-blur-md">
                 <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
                     <div className="flex items-center gap-3">
                         <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 shadow-lg shadow-indigo-900/40">
@@ -79,9 +79,15 @@ const App = () => {
                             <span className="text-[9px] font-700 tracking-widest text-indigo-400 uppercase block -mt-0.5">Rayliziie Grup Subsidiary</span>
                         </div>
                     </div>
-                    <button className="rounded-full bg-white px-5 py-2 text-xs font-700 text-slate-900 transition-all hover:bg-indigo-500 hover:text-white shadow-sm">
+                    {/* Link Aktif ke Sanity Studio Dashboard */}
+                    <a 
+                        href="https://rayliziie-media-cms.sanity.studio" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="rounded-full bg-white px-5 py-2 text-xs font-700 text-slate-900 transition-all hover:bg-indigo-500 hover:text-white shadow-sm block text-center"
+                    >
                         Portal Admin Terpusat
-                    </button>
+                    </a>
                 </div>
             </header>
 
@@ -133,7 +139,7 @@ const App = () => {
                                 <div>
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3.5">
-                                            <span className={`flex h-11 w-11 items-center justify-center rounded-xl border bg-slate-900 text-indigo-400 border-slate-800 group-hover:text-white transition-colors`}>
+                                            <span className="flex h-11 w-11 items-center justify-center rounded-xl border bg-slate-900 text-indigo-400 border-slate-800 group-hover:text-white transition-colors">
                                                 <item.icon className="h-5 w-5" />
                                             </span>
                                             <div>
