@@ -3,7 +3,7 @@ import {
     Laptop, Sparkles, Flame, Box, Landmark, 
     Globe, ShieldCheck, ArrowUpRight, ArrowRight, 
     Layers, Users, BarChart3, Radio, FileText, 
-    PlusCircle, UserPlus, Image, CheckCircle, ArrowLeft
+    PlusCircle, UserPlus, Image, Lock, Unlock
 } from 'lucide-react';
 
 const mediaNetwork = [
@@ -65,8 +65,13 @@ const stats = [
 ];
 
 const App = () => {
-    const [view, setView] = useState('home'); // 'home', 'portal', atau 'daftar-relawan'
+    const [view, setView] = useState('home'); // 'home' atau 'portal'
+    const [portalMode, setPortalMode] = useState('register'); // 'register' atau 'login'
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     
+    // Security & Login State
+    const [accessCode, setAccessCode] = useState('');
+
     // State Form Artikel
     const [title, setTitle] = useState('');
     const [category, setCategory] = useState('gizi');
@@ -76,20 +81,32 @@ const App = () => {
     // State Form Pendaftaran Relawan
     const [volunteerName, setVolunteerName] = useState('');
     const [volunteerEmail, setVolunteerEmail] = useState('');
-    const [volunteerNiche, setVolunteerNiche] = useState('gizi');
-    const [volunteerReason, setVolunteerReason] = useState('');
 
-    // Handle Upload Gambar Artikel
     const handleImageChange = (e) => {
         const file = e.target.files[0];
-        if (file) {
-            setArticleImage(URL.createObjectURL(file));
+        if (file) setArticleImage(URL.createObjectURL(file));
+    };
+
+    // FUNGSI LOGIN: Memastikan hanya kode khusus yang bisa nulis artikel
+    const handleLogin = (e) => {
+        e.preventDefault();
+        // LU BISA GANTI KODE AKSES UTAMA PENULIS DI BAWAH INI SEMAUMU, BOY
+        if (accessCode === 'RAYLIZIIE2026' || accessCode === 'PENULISCUAN') {
+            setIsLoggedIn(true);
+            alert('Akses Diterima! Selamat datang di Panel Penulis Resmi Rayliziie Media.');
+        } else {
+            alert('Kode Akses Salah atau Belum Terdaftar! Silakan hubungi Direksi Utama Rayliziie Grup untuk mendapatkan verifikasi.');
         }
+        setAccessCode('');
     };
 
     const handlePublish = (e) => {
         e.preventDefault();
-        alert(`Sukses menerbitkan artikel "${title}" ke pilar Rayliziie Media! Konten beserta gambar sedang ditinjau oleh Direksi Utama.`);
+        if (!isLoggedIn) {
+            alert('Eror Keamanan: Anda tidak memiliki otoritas untuk menerbitkan artikel!');
+            return;
+        }
+        alert(`Sukses menerbitkan artikel "${title}"! Konten dikirim ke antrean review holding.`);
         setTitle('');
         setContent('');
         setArticleImage(null);
@@ -97,99 +114,19 @@ const App = () => {
 
     const handleRegisterVolunteer = (e) => {
         e.preventDefault();
-        alert(`Halo ${volunteerName}, pendaftaran Anda sebagai relawan penulis Rayliziie Media telah diterima! Tim internal kami akan segera menghubungi Anda via email.`);
+        alert(`Halo ${volunteerName}, pendaftaran relawan Anda sukses dikirim! Tim Rayliziie Grup akan menyeleksi portfolio Anda dan mengirimkan Kode Akses Penulis lewat email jika lolos.`);
         setVolunteerName('');
         setVolunteerEmail('');
-        setVolunteerReason('');
-        setView('portal');
+        setPortalMode('login'); // Setelah daftar, diarahkan ke form login
     };
 
-    // HALAMAN PORTAL PENDAFTARAN RELAWAN (INTERNAL)
-    if (view === 'daftar-relawan') {
-        return (
-            <div className="min-h-screen bg-slate-950 text-slate-100 font-sans p-6 flex items-center justify-center">
-                <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
-                    <div className="flex items-center gap-2 text-indigo-400 font-800 text-xs uppercase tracking-wider mb-2">
-                        <UserPlus className="h-4 w-4" /> Kemitraan Penulis Kontributor
-                    </div>
-                    <h2 className="text-xl font-900 text-white tracking-tight">Gabung Rayliziie Media</h2>
-                    <p className="text-xs text-slate-400 mt-1 mb-6">Lengkapi data diri Anda untuk mulai menulis dan menghasilkan cuan bersama kami.</p>
-                    
-                    <form onSubmit={handleRegisterVolunteer} className="space-y-4">
-                        <div>
-                            <label className="block text-[10px] font-700 text-slate-400 mb-1.5 uppercase tracking-wide">Nama Lengkap</label>
-                            <input 
-                                type="text" 
-                                value={volunteerName}
-                                onChange={(e) => setVolunteerName(e.target.value)}
-                                placeholder="Masukkan nama lengkap Anda..."
-                                required
-                                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-[10px] font-700 text-slate-400 mb-1.5 uppercase tracking-wide">Alamat Email Aktif</label>
-                            <input 
-                                type="email" 
-                                value={volunteerEmail}
-                                onChange={(e) => setVolunteerEmail(e.target.value)}
-                                placeholder="name@example.com"
-                                required
-                                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-[10px] font-700 text-slate-400 mb-1.5 uppercase tracking-wide">Fokus Niche Keahlian</label>
-                            <select 
-                                value={volunteerNiche}
-                                onChange={(e) => setVolunteerNiche(e.target.value)}
-                                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                            >
-                                <option value="gizi">NutrisiDietMu (Gizi & Kesehatan)</option>
-                                <option value="bola">BolaGass (Jurnalisme Olahraga)</option>
-                                <option value="skincare">GlowLogika (Skincare & Beauty)</option>
-                                <option value="keuangan">CuanPintar (Finansial & Investasi)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className="block text-[10px] font-700 text-slate-400 mb-1.5 uppercase tracking-wide">Mengapa Anda Ingin Bergabung?</label>
-                            <textarea 
-                                rows="3"
-                                value={volunteerReason}
-                                onChange={(e) => setVolunteerReason(e.target.value)}
-                                placeholder="Ceritakan singkat pengalaman atau motivasi menulismu..."
-                                required
-                                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors resize-none"
-                            ></textarea>
-                        </div>
-                        <div className="pt-2 flex gap-3">
-                            <button 
-                                type="button"
-                                onClick={() => setView('portal')}
-                                className="w-1/3 bg-slate-800 text-slate-300 font-700 text-xs py-2.5 rounded-xl hover:bg-slate-700 transition-all"
-                            >
-                                Batal
-                            </button>
-                            <button 
-                                type="submit" 
-                                className="w-2/3 bg-indigo-600 text-white font-700 text-xs py-2.5 rounded-xl hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-900/20"
-                            >
-                                Ajukan Pendaftaran
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        );
-    }
-
-    // HALAMAN DASHBOARD CMS UTAMA
+    // PANEL PORTAL UTAMA (CMS & REGISTRASI/LOGIN)
     if (view === 'portal') {
         return (
             <div className="min-h-screen bg-slate-950 text-slate-100 font-sans p-6">
                 <div className="mx-auto max-w-4xl">
                     
-                    {/* Header Portal */}
+                    {/* Header Nav Portal */}
                     <div className="flex items-center justify-between border-b border-slate-800 pb-5 mb-8">
                         <div className="flex items-center gap-3">
                             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600">
@@ -197,137 +134,211 @@ const App = () => {
                             </span>
                             <div>
                                 <h1 className="text-lg font-900 tracking-tight text-white">RAYLIZIIE CMS PANEL</h1>
-                                <p className="text-[10px] text-indigo-400 font-600 uppercase tracking-wider">Pusat Manajemen Artikel & Relawan</p>
+                                <p className="text-[10px] text-indigo-400 font-600 uppercase tracking-wider">Sistem Proteksi Artikel Terintegrasi</p>
                             </div>
                         </div>
-                        <button 
-                            onClick={() => setView('home')} 
-                            className="text-xs font-700 bg-slate-800 text-slate-300 hover:bg-slate-700 px-4 py-2 rounded-full transition-colors"
-                        >
-                            Kembali ke Web Utama
-                        </button>
+                        <div className="flex gap-2">
+                            {isLoggedIn && (
+                                <button 
+                                    onClick={() => setIsLoggedIn(false)} 
+                                    className="text-xs font-700 bg-red-950 text-red-400 border border-red-900 px-4 py-2 rounded-full hover:bg-red-900 hover:text-white transition-colors"
+                                >
+                                    Logout
+                                </button>
+                            )}
+                            <button 
+                                onClick={() => { setView('home'); setIsLoggedIn(false); }} 
+                                className="text-xs font-700 bg-slate-800 text-slate-300 hover:bg-slate-700 px-4 py-2 rounded-full transition-colors"
+                            >
+                                Kembali ke Web Utama
+                            </button>
+                        </div>
                     </div>
 
-                    {/* Banner Ajakan Menjadi Relawan (Pindah ke Form Internal) */}
-                    <div className="mb-8 p-5 rounded-2xl border border-indigo-500/30 bg-gradient-to-r from-indigo-950/40 via-purple-950/20 to-slate-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                        <div>
-                            <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-0.5 text-[10px] font-700 uppercase text-indigo-400">
-                                Program Relawan Penulis 2026
-                            </span>
-                            <h2 className="text-base font-800 text-white mt-2">Mau Jadi Kontributor & Dapat Penghasilan?</h2>
-                            <p className="text-xs text-slate-400 mt-0.5">Salurkan keahlian menulismu di bidang Gizi, Bola, Skincare, atau Finansial dan dapatkan bagi hasil kompetitif.</p>
-                        </div>
-                        <button 
-                            onClick={() => setView('daftar-relawan')}
-                            className="flex items-center gap-1.5 text-xs font-700 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl shadow-lg shadow-indigo-900/20 whitespace-nowrap transition-all"
-                        >
-                            <UserPlus className="h-3.5 w-3.5" /> Daftar Relawan Cuan
-                        </button>
-                    </div>
+                    {/* JIKA BELUM LOGIN: TAMPILKAN OPSI DAFTAR / LOGIN KODE AKSES */}
+                    {!isLoggedIn ? (
+                        <div className="w-full max-w-md mx-auto bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl mt-8">
+                            <div className="flex border-b border-slate-800 mb-6">
+                                <button 
+                                    onClick={() => setPortalMode('register')}
+                                    className={`w-1/2 pb-3 text-xs font-800 uppercase tracking-wider border-b-2 transition-all ${portalMode === 'register' ? 'border-indigo-500 text-white' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
+                                >
+                                    Daftar Relawan
+                                </button>
+                                <button 
+                                    onClick={() => setPortalMode('login')}
+                                    className={`w-1/2 pb-3 text-xs font-800 uppercase tracking-wider border-b-2 transition-all ${portalMode === 'login' ? 'border-indigo-500 text-white' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
+                                >
+                                    Login Penulis
+                                </button>
+                            </div>
 
-                    {/* Form Utama Penulisan Artikel */}
-                    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
-                        <div className="flex items-center gap-2 mb-6 text-sm font-800 text-white uppercase tracking-wider">
-                            <PlusCircle className="h-4 w-4 text-indigo-400" /> Tulis Artikel Baru
-                        </div>
-                        <form onSubmit={handlePublish} className="space-y-5">
-                            <div className="grid gap-5 md:grid-cols-3">
-                                <div className="md:col-span-2 space-y-5">
+                            {portalMode === 'register' ? (
+                                <form onSubmit={handleRegisterVolunteer} className="space-y-4">
+                                    <div className="flex items-center gap-2 text-indigo-400 font-700 text-[10px] uppercase tracking-wider mb-1">
+                                        <UserPlus className="h-3.5 w-3.5" /> Registrasi Kontributor Baru
+                                    </div>
                                     <div>
-                                        <label className="block text-xs font-700 text-slate-400 mb-2 uppercase tracking-wide">Judul Berita / Artikel</label>
+                                        <label className="block text-[10px] font-700 text-slate-400 mb-1.5 uppercase tracking-wide">Nama Lengkap</label>
                                         <input 
                                             type="text" 
-                                            value={title}
-                                            onChange={(e) => setTitle(e.target.value)}
-                                            placeholder="Masukkan judul artikel yang memikat..."
+                                            value={volunteerName}
+                                            onChange={(e) => setVolunteerName(e.target.value)}
+                                            placeholder="Masukkan nama lengkap Anda..."
                                             required
-                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-700 text-slate-400 mb-2 uppercase tracking-wide">Target Publikasi Media</label>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            {[
-                                                { id: 'gizi', label: 'NutrisiDietMu' },
-                                                { id: 'bola', label: 'BolaGass' },
-                                                { id: 'skincare', label: 'GlowLogika' },
-                                                { id: 'keuangan', label: 'CuanPintar' },
-                                            ].map((cat) => (
-                                                <label 
-                                                    key={cat.id} 
-                                                    className={`flex items-center justify-center p-2.5 rounded-xl border text-xs font-700 cursor-pointer select-none transition-all ${
-                                                        category === cat.id 
-                                                            ? 'bg-indigo-600/10 border-indigo-500 text-white' 
-                                                            : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
-                                                    }`}
-                                                >
-                                                    <input 
-                                                        type="radio" 
-                                                        name="category" 
-                                                        value={cat.id} 
-                                                        checked={category === cat.id}
-                                                        onChange={() => setCategory(cat.id)}
-                                                        className="sr-only" 
-                                                    />
-                                                    {cat.label}
+                                        <label className="block text-[10px] font-700 text-slate-400 mb-1.5 uppercase tracking-wide">Alamat Email Aktif</label>
+                                        <input 
+                                            type="email" 
+                                            value={volunteerEmail}
+                                            onChange={(e) => setVolunteerEmail(e.target.value)}
+                                            placeholder="name@example.com"
+                                            required
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                                        />
+                                    </div>
+                                    <button type="submit" className="w-full bg-indigo-600 text-white font-700 text-xs py-3 rounded-xl hover:bg-indigo-500 transition-all shadow-lg mt-2">
+                                        Ajukan Pendaftaran Relawan
+                                    </button>
+                                    <p className="text-[10px] text-slate-500 text-center mt-3">Setelah diverifikasi oleh Admin Rayliziie Grup, Kode Akses Penulis akan dikirim ke email Anda.</p>
+                                </form>
+                            ) : (
+                                <form onSubmit={handleLogin} className="space-y-4">
+                                    <div className="flex items-center gap-2 text-amber-400 font-700 text-[10px] uppercase tracking-wider mb-1">
+                                        <Lock className="h-3.5 w-3.5" /> Proteksi Gerbang Penulisan
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-700 text-slate-400 mb-1.5 uppercase tracking-wide">Kode Akses Penulis (Token/Password)</label>
+                                        <input 
+                                            type="password" 
+                                            value={accessCode}
+                                            onChange={(e) => setAccessCode(e.target.value)}
+                                            placeholder="Masukkan kode otentikasi resmi..."
+                                            required
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors tracking-widest"
+                                        />
+                                    </div>
+                                    <button type="submit" className="w-full bg-white text-slate-900 font-700 text-xs py-3 rounded-xl hover:bg-indigo-600 hover:text-white transition-all shadow-lg mt-2">
+                                        Verifikasi & Masuk Panel
+                                    </button>
+                                    <p className="text-[10px] text-slate-500 text-center mt-3">Hanya kontributor terverifikasi yang dapat menerbitkan konten artikel.</p>
+                                </form>
+                            )}
+                        </div>
+                    ) : (
+                        
+                        // JIKA SUDAH LOGIN & TERVERIFIKASI: PANEL NULIS TERBUKA OTOMATIS
+                        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl animate-in fade-in duration-350">
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="flex items-center gap-2 text-sm font-800 text-white uppercase tracking-wider">
+                                    <PlusCircle className="h-4 w-4 text-emerald-400" /> Tulis Artikel Baru (Akses Diterima)
+                                </div>
+                                <span className="flex items-center gap-1 text-[10px] font-700 text-emerald-400 bg-emerald-950/50 border border-emerald-900/50 px-2.5 py-1 rounded-md">
+                                    <Unlock className="h-3 w-3" /> Penulis Terverifikasi
+                                </span>
+                            </div>
+                            
+                            <form onSubmit={handlePublish} className="space-y-5">
+                                <div className="grid gap-5 md:grid-cols-3">
+                                    <div className="md:col-span-2 space-y-5">
+                                        <div>
+                                            <label className="block text-xs font-700 text-slate-400 mb-2 uppercase tracking-wide">Judul Berita / Artikel</label>
+                                            <input 
+                                                type="text" 
+                                                value={title}
+                                                onChange={(e) => setTitle(e.target.value)}
+                                                placeholder="Masukkan judul artikel yang memikat..."
+                                                required
+                                                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-700 text-slate-400 mb-2 uppercase tracking-wide">Target Publikasi Media</label>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {[
+                                                    { id: 'gizi', label: 'NutrisiDietMu' },
+                                                    { id: 'bola', label: 'BolaGass' },
+                                                    { id: 'skincare', label: 'GlowLogika' },
+                                                    { id: 'keuangan', label: 'CuanPintar' },
+                                                ].map((cat) => (
+                                                    <label 
+                                                        key={cat.id} 
+                                                        className={`flex items-center justify-center p-2.5 rounded-xl border text-xs font-700 cursor-pointer select-none transition-all ${
+                                                            category === cat.id 
+                                                                ? 'bg-indigo-600/10 border-indigo-500 text-white' 
+                                                                : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
+                                                        }`}
+                                                    >
+                                                        <input 
+                                                            type="radio" 
+                                                            name="category" 
+                                                            value={cat.id} 
+                                                            checked={category === cat.id}
+                                                            onChange={() => setCategory(cat.id)}
+                                                            className="sr-only" 
+                                                        />
+                                                        {cat.label}
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-col">
+                                        <label className="block text-xs font-700 text-slate-400 mb-2 uppercase tracking-wide">Cover / Gambar Artikel</label>
+                                        <div className="flex-1 min-h-[140px] bg-slate-950 border-2 border-dashed border-slate-800 rounded-xl flex flex-col items-center justify-center p-4 relative group hover:border-indigo-500/50 transition-colors">
+                                            {articleImage ? (
+                                                <>
+                                                    <img src={articleImage} alt="Preview" className="w-full h-full object-cover rounded-lg" />
+                                                    <label className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs font-700 text-white rounded-xl cursor-pointer transition-opacity">
+                                                        Ganti Gambar
+                                                        <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                                                    </label>
+                                                </>
+                                            ) : (
+                                                <label className="flex flex-col items-center justify-center cursor-pointer w-full h-full">
+                                                    <Image className="h-6 w-6 text-slate-500 mb-2 group-hover:text-indigo-400 transition-colors" />
+                                                    <span className="text-[11px] font-600 text-slate-400 text-center">Pilih File Gambar</span>
+                                                    <span className="text-[9px] text-slate-600 mt-0.5">JPG, PNG up to 5MB</span>
+                                                    <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
                                                 </label>
-                                            ))}
+                                            )}
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* BAGIAN UPLOAD GAMBAR ARTIKEL */}
-                                <div className="flex flex-col">
-                                    <label className="block text-xs font-700 text-slate-400 mb-2 uppercase tracking-wide">Cover / Gambar Artikel</label>
-                                    <div className="flex-1 min-h-[140px] bg-slate-950 border-2 border-dashed border-slate-800 rounded-xl flex flex-col items-center justify-center p-4 relative group hover:border-indigo-500/50 transition-colors">
-                                        {articleImage ? (
-                                            <>
-                                                <img src={articleImage} alt="Preview" className="w-full h-full object-cover rounded-lg" />
-                                                <label className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs font-700 text-white rounded-xl cursor-pointer transition-opacity">
-                                                    Ganti Gambar
-                                                    <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
-                                                </label>
-                                            </>
-                                        ) : (
-                                            <label className="flex flex-col items-center justify-center cursor-pointer w-full h-full">
-                                                <Image className="h-6 w-6 text-slate-500 mb-2 group-hover:text-indigo-400 transition-colors" />
-                                                <span className="text-[11px] font-600 text-slate-400 text-center">Pilih File Gambar</span>
-                                                <span className="text-[9px] text-slate-600 mt-0.5">JPG, PNG up to 5MB</span>
-                                                <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
-                                            </label>
-                                        )}
-                                    </div>
+                                <div>
+                                    <label className="block text-xs font-700 text-slate-400 mb-2 uppercase tracking-wide">Isi Konten Berita</label>
+                                    <textarea 
+                                        rows="7"
+                                        value={content}
+                                        onChange={(e) => setContent(e.target.value)}
+                                        placeholder="Ketik draf berita lengkap lu di sini, Boy..."
+                                        required
+                                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors resize-none"
+                                    ></textarea>
                                 </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-xs font-700 text-slate-400 mb-2 uppercase tracking-wide">Isi Konten Berita</label>
-                                <textarea 
-                                    rows="7"
-                                    value={content}
-                                    onChange={(e) => setContent(e.target.value)}
-                                    placeholder="Ketik draf berita lengkap lu di sini, Boy..."
-                                    required
-                                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors resize-none"
-                                ></textarea>
-                            </div>
-                            <div className="pt-2 flex justify-end">
-                                <button 
-                                    type="submit" 
-                                    className="bg-white text-slate-900 font-700 text-xs px-6 py-3 rounded-xl hover:bg-indigo-600 hover:text-white transition-all shadow-md"
-                                >
-                                    Terbitkan Berita
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                                <div className="pt-2 flex justify-end">
+                                    <button 
+                                        type="submit" 
+                                        className="bg-white text-slate-900 font-700 text-xs px-6 py-3 rounded-xl hover:bg-indigo-600 hover:text-white transition-all shadow-md"
+                                    >
+                                        Terbitkan Berita
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    )}
 
                 </div>
             </div>
         );
     }
 
-    // LANDING PAGE HOME UTAMA
+    // LANDING PAGE UTAMA (TAMPILAN DEPAN)
     return (
         <div className="min-h-screen bg-slate-900 text-slate-100 font-sans selection:bg-indigo-600 selection:text-white antialiased">
             <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-900/90 backdrop-blur-md">
