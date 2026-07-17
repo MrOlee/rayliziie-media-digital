@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-// Data Supabase lu yang udah terbukti jalan
+// GANTI DENGAN KUNCI SUPABASE LU DI SINI
 const SUPABASE_URL = "https://harpdcqmrqdgckcuhxfr.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_ppzSXi7DuN7v0racT9l98A_JxK5-MGG";
 
@@ -17,6 +17,8 @@ const App = () => {
     const [users, setUsers] = useState([]);
     const [articles, setArticles] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
+
+    // Form
     const [regName, setRegName] = useState('');
     const [regEmail, setRegEmail] = useState('');
     const [regPassword, setRegPassword] = useState('');
@@ -38,44 +40,41 @@ const App = () => {
 
     useEffect(() => { fetchData(); const interval = setInterval(fetchData, 3000); return () => clearInterval(interval); }, []);
 
-    // ADMIN DASHBOARD
+    // DASHBOARD ADMIN PREMIUM
     if (view === 'admin-dashboard') {
         return (
-            <div style={{ minHeight: '100vh', backgroundColor: '#0f172a', color: '#f8fafc', padding: '40px', fontFamily: 'sans-serif' }}>
-                <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #334155', paddingBottom: '20px' }}>
-                        <h1 style={{ margin: 0 }}>⚙️ CENTRAL CONTROL SERVER</h1>
-                        <button onClick={() => setView('home')} style={{ background: '#7f1d1d', border: 'none', padding: '10px 20px', borderRadius: '20px', color: '#fff', cursor: 'pointer' }}>Keluar Server</button>
+            <div style={{ minHeight: '100vh', backgroundColor: '#0f172a', color: '#fff', padding: '40px', fontFamily: 'sans-serif' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '30px' }}>
+                    <h1 style={{ margin: 0 }}>⚙️ CENTRAL CONTROL SERVER</h1>
+                    <button onClick={() => setView('home')} style={{ background: '#7f1d1d', padding: '10px 20px', borderRadius: '20px', color: '#fff', border: 'none', cursor: 'pointer' }}>Keluar Server</button>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '20px' }}>
+                    <div style={{ background: '#1e293b', padding: '20px', borderRadius: '16px' }}>
+                        <h3>👥 VERIFIKASI ({users.filter(u=>!u.approved).length})</h3>
+                        {users.filter(u=>!u.approved).map(u => (
+                            <div key={u.id} style={{ background: '#0f172a', padding: '15px', marginBottom: '10px', borderRadius: '12px' }}>
+                                {u.name}<br/>
+                                <button onClick={() => fetch(`${SUPABASE_URL}/rest/v1/rayliziie_users?id=eq.${u.id}`, { method:'PATCH', headers, body: JSON.stringify({approved: true}) }).then(fetchData)}>Approve</button>
+                            </div>
+                        ))}
                     </div>
-                    <div style={{ display: 'flex', gap: '24px', marginTop: '30px', flexWrap: 'wrap' }}>
-                        <div style={{ flex: '1', background: '#1e293b', padding: '20px', borderRadius: '16px' }}>
-                            <h3>👥 VERIFIKASI AKUN ({users.filter(u=>!u.approved).length})</h3>
-                            {users.filter(u=>!u.approved).map(u => (
-                                <div key={u.id} style={{ background: '#0f172a', padding: '15px', marginBottom: '10px', borderRadius: '12px' }}>
-                                    <p style={{ margin: '0 0 5px 0', fontSize: '14px', fontWeight: 'bold' }}>{u.name}</p>
-                                    <button onClick={() => fetch(`${SUPABASE_URL}/rest/v1/rayliziie_users?id=eq.${u.id}`, { method:'PATCH', headers, body: JSON.stringify({approved: true}) }).then(fetchData)}>Approve</button>
-                                </div>
-                            ))}
-                        </div>
-                        <div style={{ flex: '2', background: '#1e293b', padding: '20px', borderRadius: '16px' }}>
-                            <h3>📝 MEJA SENSOR ARTIKEL ({articles.filter(a=>a.status==='Pending Review').length})</h3>
-                            {articles.filter(a=>a.status==='Pending Review').map(a => (
-                                <div key={a.id} style={{ background: '#0f172a', padding: '15px', marginBottom: '10px', borderRadius: '12px' }}>
-                                    <h4>{a.title}</h4>
-                                    {a.image_url && <img src={a.image_url} width="100" style={{ borderRadius: '8px' }} />}<br/>
-                                    <button onClick={() => fetch(`${SUPABASE_URL}/rest/v1/rayliziie_articles?id=eq.${a.id}`, { method:'PATCH', headers, body: JSON.stringify({status: 'Published'}) }).then(fetchData)}>Terbitkan</button>
-                                </div>
-                            ))}
-                        </div>
+                    <div style={{ background: '#1e293b', padding: '20px', borderRadius: '16px' }}>
+                        <h3>📝 SENSOR ARTIKEL</h3>
+                        {articles.filter(a=>a.status==='Pending Review').map(a => (
+                            <div key={a.id} style={{ background: '#0f172a', padding: '15px', marginBottom: '10px', borderRadius: '12px' }}>
+                                <h4>{a.title}</h4>
+                                <button onClick={() => fetch(`${SUPABASE_URL}/rest/v1/rayliziie_articles?id=eq.${a.id}`, { method:'PATCH', headers, body: JSON.stringify({status: 'Published'}) }).then(fetchData)}>Terbitkan</button>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
         );
     }
 
-    // TAMPILAN PREMIUM
     return (
-        <div style={{ backgroundColor: '#020617', minHeight: '100vh', color: '#fff', fontFamily: 'sans-serif' }}>
+        <div style={{ backgroundColor: '#0f172a', minHeight: '100vh', color: '#fff', fontFamily: 'sans-serif' }}>
+            {/* Header Original */}
             <header style={{ padding: '20px 40px', borderBottom: '1px solid #1e293b', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h1 style={{ margin: 0, fontSize: '24px' }}>RAYLIZIIE MEDIA DIGITAL</h1>
                 <button onClick={() => setView('portal')} style={{ padding: '10px 20px', borderRadius: '20px', background: '#fff', color: '#000', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>Portal Admin & Relawan</button>
@@ -84,32 +83,41 @@ const App = () => {
             {view === 'home' && (
                 <main style={{ padding: '60px 40px' }}>
                     <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-                        <h2 style={{ fontSize: '48px', margin: 0 }}>Navigasi Masa Depan</h2>
-                        <p style={{ color: '#94a3b8', fontSize: '18px' }}>Ekosistem Media Siber Terintegrasi</p>
+                        <span style={{ color: '#818cf8', fontSize: '14px', textTransform: 'uppercase', letterSpacing: '2px' }}>🛡️ DIVISI INFORMASI & TEKNOLOGI GLOBAL</span>
+                        <h2 style={{ fontSize: '48px', margin: '20px 0' }}>Navigasi Masa Depan</h2>
+                        <p style={{ color: '#818cf8', fontSize: '24px', margin: 0 }}>Ekosistem Media Siber Terintegrasi</p>
                     </div>
+
+                    <h3 style={{ marginBottom: '30px' }}>DIGITAL MEDIA NETWORK</h3>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
                         {['gizi', 'bola', 'skincare', 'keuangan'].map(cat => (
-                            <div key={cat} style={{ background: '#1e293b', padding: '24px', borderRadius: '16px' }}>
-                                <h3 style={{ borderBottom: '1px solid #334155', paddingBottom: '10px' }}>{cat.toUpperCase()}</h3>
+                            <div key={cat} style={{ background: '#1e293b', padding: '24px', borderRadius: '16px', border: '1px solid #334155' }}>
+                                <h3>{cat === 'gizi' ? 'NutrisiDietMu' : cat === 'bola' ? 'BolaGass' : cat === 'skincare' ? 'GlowLogika' : 'CuanPintar'}</h3>
                                 {articles.filter(a => a.category === cat && a.status === 'Published').map(a => (
-                                    <div key={a.id} style={{ marginTop: '20px' }}>
+                                    <div key={a.id} style={{ marginTop: '20px', borderTop: '1px solid #334155', paddingTop: '10px' }}>
                                         {a.image_url && <img src={a.image_url} width="100%" style={{ borderRadius: '8px' }} />}
                                         <h4 style={{ margin: '10px 0' }}>{a.title}</h4>
-                                        <p style={{ fontSize: '12px', color: '#64748b' }}>Oleh: {a.author}</p>
                                     </div>
                                 ))}
                             </div>
                         ))}
                     </div>
+
+                    <h3 style={{ marginTop: '50px', marginBottom: '30px' }}>DIGITAL BUSINESS SERVICES</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+                        <div style={{ background: '#1e293b', padding: '24px', borderRadius: '16px', border: '1px solid #334155' }}><h3>Web Dev & Techno</h3></div>
+                        <div style={{ background: '#1e293b', padding: '24px', borderRadius: '16px', border: '1px solid #334155' }}><h3>Rayliziie Digital Invitation</h3></div>
+                    </div>
                 </main>
             )}
 
+            {/* Portal & Admin Forms */}
             {view === 'portal' && (
                 <div style={{ padding: '60px 40px' }}>
                     <div style={{ maxWidth: '400px', margin: 'auto', background: '#1e293b', padding: '40px', borderRadius: '16px' }}>
                         {!currentUser ? (
                             portalMode === 'login' ? (
-                                <form onSubmit={e => { e.preventDefault(); if(loginEmail==='admin'&&loginPassword==='ceozie') setView('admin-dashboard'); else { const user = users.find(u=>u.email===loginEmail && u.password===loginPassword && u.approved); if(user) setCurrentUser(user); else alert('Gagal!'); }}}>
+                                <form onSubmit={e => { e.preventDefault(); if(loginEmail==='admin'&&loginPassword==='ceozie') setView('admin-dashboard'); else { const user = users.find(u=>u.email===loginEmail && u.password===loginPassword && u.approved); if(user) setCurrentUser(user); else alert('Login Gagal!'); }}}>
                                     <h2>Login Penulis</h2>
                                     <input placeholder="Email" onChange={e=>setLoginEmail(e.target.value)} style={{ width: '100%', padding: '12px', margin: '10px 0', borderRadius: '8px', border: 'none' }} /><br/>
                                     <input type="password" placeholder="Password" onChange={e=>setLoginPassword(e.target.value)} style={{ width: '100%', padding: '12px', margin: '10px 0', borderRadius: '8px', border: 'none' }} /><br/>
