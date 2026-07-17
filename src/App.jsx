@@ -12,8 +12,8 @@ function App() {
         <header className="flex flex-col sm:flex-row gap-4 justify-between items-center p-6 md:px-12 border-b border-slate-800 bg-[#0F172A]">
           <h1 className="text-xl font-black text-white uppercase tracking-wider">RAYLIZIIE MEDIA DIGITAL</h1>
           <div className="flex gap-3">
-            <button onClick={() => setCurrentView('relawan')} className="bg-white text-[#0B1120] px-5 py-2 rounded-full font-bold text-sm">Portal Relawan</button>
-            <button onClick={() => setCurrentView('ceo')} className="bg-red-800 text-white px-5 py-2 rounded-full font-bold text-sm">Server CEO</button>
+            <button onClick={() => setCurrentView('relawan')} className="bg-white text-[#0B1120] px-5 py-2 rounded-full font-bold text-sm hover:bg-slate-200">Portal Relawan</button>
+            <button onClick={() => setCurrentView('ceo')} className="bg-red-800 text-white px-5 py-2 rounded-full font-bold text-sm hover:bg-red-700">Server CEO</button>
           </div>
         </header>
         <main className="p-12 text-center text-white">
@@ -29,7 +29,10 @@ function App() {
 
   return (
     <div className="relative">
-      <button onClick={() => setCurrentView('hub')} className="fixed bottom-6 right-6 z-[999] bg-slate-800 text-white px-5 py-3 rounded-full font-bold text-sm border border-slate-600">
+      <button 
+        onClick={() => setCurrentView('hub')} 
+        className="fixed bottom-6 right-6 z-[999] bg-slate-800 text-white px-5 py-3 rounded-full font-bold text-sm border border-slate-600 hover:bg-slate-700 shadow-xl"
+      >
         &larr; Kembali ke Hub
       </button>
       {currentView === 'public' && <HomePage />}
