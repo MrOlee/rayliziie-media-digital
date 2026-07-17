@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { 
     Laptop, Sparkles, Flame, Box, Landmark, 
     Globe, ShieldCheck, ArrowUpRight, ArrowRight, 
@@ -12,7 +11,7 @@ const mediaNetwork = [
         icon: Sparkles, 
         cat: "Media Kesehatan & Gizi", 
         desc: "Portal edukasi gizi klinis, analisis pangan berbasis bukti ilmiah, dan panduan kesehatan masyarakat.",
-        color: "border-teal-550 text-teal-600 bg-teal-50",
+        color: "text-teal-400 bg-teal-950/30 border-teal-900/50",
         link: "https://nutrisidietmu.vercel.app" 
     },
     { 
@@ -20,7 +19,7 @@ const mediaNetwork = [
         icon: Flame, 
         cat: "Media Jurnalisme Olahraga", 
         desc: "Platform jurnalisme sepak bola dengan ulasan taktis mendalam, analisis bursa transfer, dan kabar terupdate.",
-        color: "border-orange-550 text-orange-600 bg-orange-50",
+        color: "text-orange-400 bg-orange-950/30 border-orange-900/50",
         link: "#" 
     },
     { 
@@ -28,7 +27,7 @@ const mediaNetwork = [
         icon: Box, 
         cat: "Edukasi Skincare & Beauty", 
         desc: "Media literasi kesehatan kulit dan ulasan kandungan kosmetik berdasarkan sains serta fakta medis.",
-        color: "border-pink-550 text-pink-600 bg-pink-50",
+        color: "text-pink-400 bg-pink-950/30 border-pink-900/50",
         link: "#" 
     },
     { 
@@ -36,7 +35,7 @@ const mediaNetwork = [
         icon: Landmark, 
         cat: "Literasi Finansial & Investasi", 
         desc: "Portal perencanaan keuangan harian, investasi anak muda, dan edukasi melek finansial makro.",
-        color: "border-blue-550 text-blue-600 bg-blue-50",
+        color: "text-blue-400 bg-blue-950/30 border-blue-900/50",
         link: "#" 
     }
 ];
@@ -47,14 +46,14 @@ const businessServices = [
         icon: Laptop, 
         cat: "Pengembangan IT & Solusi Digital", 
         desc: "Layanan pembuatan website korporat, aplikasi mobile, optimasi SEO, dan infrastruktur sistem digital perusahaan.",
-        color: "border-cyan-550 text-cyan-600 bg-cyan-50"
+        color: "text-cyan-400 bg-cyan-950/30 border-cyan-900/50"
     },
     { 
         name: "Rayliziie Digital Invitation", 
         icon: Globe, 
         cat: "Layanan Undangan Digital Premium", 
         desc: "Jasa perancangan undangan digital elegan untuk acara pernikahan, khitanan, sempro, semhas, hingga sidang.",
-        color: "border-indigo-550 text-indigo-600 bg-indigo-50"
+        color: "text-indigo-400 bg-indigo-950/30 border-indigo-900/50"
     }
 ];
 
@@ -68,8 +67,8 @@ const App = () => {
     return (
         <div className="min-h-screen bg-slate-900 text-slate-100 font-sans selection:bg-indigo-600 selection:text-white antialiased">
             
-            {/* Navigasi Utama Korporat */}
-            <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-900/90 backdrop-blur-md">
+            {/* Header */}
+            <header className="sticky top-0 z-50 border-b border-slate-850 bg-slate-900/95 backdrop-blur-md">
                 <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
                     <div className="flex items-center gap-3">
                         <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 shadow-lg shadow-indigo-900/40">
@@ -86,37 +85,26 @@ const App = () => {
                 </div>
             </header>
 
-            {/* Hero Section Super Mewah */}
+            {/* Hero Section */}
             <section className="relative overflow-hidden pt-24 pb-16 text-center md:pt-32 md:pb-24">
                 <div className="mx-auto max-w-4xl px-6 relative z-10">
-                    <motion.span 
-                        initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-                        className="inline-flex items-center gap-2 rounded-full border border-slate-800 bg-slate-800/60 px-4 py-1.5 text-xs font-600 uppercase tracking-wider text-indigo-400 shadow-inner"
-                    >
+                    <span className="inline-flex items-center gap-2 rounded-full border border-slate-800 bg-slate-800/60 px-4 py-1.5 text-xs font-600 uppercase tracking-wider text-indigo-400 shadow-inner">
                         <ShieldCheck className="h-3.5 w-3.5 text-indigo-400" /> Divisi Informasi & Teknologi Global
-                    </motion.span>
-                    
-                    <motion.h1 
-                        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-                        className="mt-6 font-display text-4xl font-900 leading-[1.1] tracking-tight text-white md:text-6xl"
-                    >
+                    </span>
+                    <h1 className="mt-6 font-display text-4xl font-900 leading-[1.1] tracking-tight text-white md:text-6xl">
                         Navigasi Masa Depan <br />
                         <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Ekosistem Media Siber Terintegrasi</span>
-                    </motion.h1>
-
-                    <motion.p 
-                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}
-                        className="mx-auto mt-6 max-w-2xl text-base md:text-lg leading-relaxed text-slate-400"
-                    >
-                        Rayliziie Media Digital memimpin orkestrasi portal berita multi-sektor dan penyediaan infrastruktur teknologi terapan untuk mendorong penetrasi literasi digital secara kredibel.
-                    </motion.p>
+                    </h1>
+                    <p className="mx-auto mt-6 max-w-2xl text-base md:text-lg leading-relaxed text-slate-400">
+                        Rayliziie Media Digital memimpin orkestrasi portal berita multi-sektor dan penyediaan infrastruktur teknologi terapan untuk mendorong penetrasi literasi digital secara profesional.
+                    </p>
                 </div>
             </section>
 
-            {/* Ringkasan Statistik Performa */}
+            {/* Ringkasan Statistik */}
             <section className="mx-auto max-w-6xl px-6 mb-20">
                 <div className="grid gap-6 sm:grid-cols-3 border border-slate-800 bg-slate-900 rounded-2xl p-6 shadow-xl">
-                    {stats.map((s, i) => (
+                    {stats.map((s) => (
                         <div key={s.label} className="flex items-center gap-4 p-4 rounded-xl bg-slate-950/40 border border-slate-800/50">
                             <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-950 text-indigo-400 border border-indigo-900/50">
                                 <s.icon className="h-5 w-5" />
@@ -139,13 +127,13 @@ const App = () => {
                         <h2 className="font-display text-xs font-800 tracking-widest text-slate-400 uppercase">Digital Media Network</h2>
                         <div className="h-px flex-1 bg-slate-800"></div>
                     </div>
-                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-2">
-                        {mediaNetwork.map((item, idx) => (
+                    <div className="grid gap-6 sm:grid-cols-2">
+                        {mediaNetwork.map((item) => (
                             <div key={item.name} className="group relative flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-950/50 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-slate-700 hover:bg-slate-950">
                                 <div>
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3.5">
-                                            <span className="flex h-11 w-11 items-center justify-center rounded-xl border bg-slate-900 border-slate-800 text-indigo-400 group-hover:text-white transition-colors">
+                                            <span className={`flex h-11 w-11 items-center justify-center rounded-xl border bg-slate-900 text-indigo-400 border-slate-800 group-hover:text-white transition-colors`}>
                                                 <item.icon className="h-5 w-5" />
                                             </span>
                                             <div>
@@ -174,7 +162,7 @@ const App = () => {
                         <div className="h-px flex-1 bg-slate-800"></div>
                     </div>
                     <div className="grid gap-6 sm:grid-cols-2">
-                        {businessServices.map((item, idx) => (
+                        {businessServices.map((item) => (
                             <div key={item.name} className="group relative flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-950/50 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-slate-700 hover:bg-slate-950">
                                 <div>
                                     <div className="flex items-center gap-3.5">
@@ -201,7 +189,7 @@ const App = () => {
 
             </main>
 
-            {/* Footer Eksklusif Holding */}
+            {/* Footer */}
             <footer className="border-t border-slate-800 bg-slate-950/60">
                 <div className="mx-auto max-w-7xl px-6 py-12 text-center text-xs text-slate-500">
                     <p>&copy; 2026 Rayliziie Media Digital. Seluruh Hak Cipta Dilindungi.</p>
