@@ -1,10 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    Laptop, Sparkles, Flame, Box, Landmark, 
-    Globe, ShieldCheck, ArrowUpRight, ArrowRight, 
-    Layers, Users, BarChart3, Radio, FileText, 
-    PlusCircle, UserPlus, Image, Lock, Unlock, Eye, Check, X, Settings
-} from 'lucide-react';
 
 // Database Awal bawaan sistem
 const initialUsers = [
@@ -12,28 +6,27 @@ const initialUsers = [
 ];
 
 const mediaNetwork = [
-    { name: "NutrisiDietMu", icon: Sparkles, cat: "Media Kesehatan & Gizi", desc: "Portal edukasi gizi klinis dan panduan kesehatan masyarakat.", color: "text-teal-400 bg-teal-950/30 border-teal-900/50", link: "https://nutrisidietmu.vercel.app" },
-    { name: "BolaGass", icon: Flame, cat: "Media Jurnalisme Olahraga", desc: "Platform jurnalisme sepak bola dengan ulasan taktis mendalam.", color: "text-orange-400 bg-orange-950/30 border-orange-900/50", link: "#" },
-    { name: "GlowLogika", icon: Box, cat: "Edukasi Skincare & Beauty", desc: "Media literasi kesehatan kulit berdasarkan sains serta fakta medis.", color: "text-pink-400 bg-pink-950/30 border-pink-900/50", link: "#" },
-    { name: "CuanPintar", icon: Landmark, cat: "Literasi Finansial & Investasi", desc: "Portal perencanaan keuangan harian dan investasi anak muda.", color: "text-blue-400 bg-blue-950/30 border-blue-900/50", link: "#" }
+    { name: "NutrisiDietMu", icon: "🌱", cat: "Media Kesehatan & Gizi", desc: "Portal edukasi gizi klinis dan panduan kesehatan masyarakat.", color: "border-teal-900/50", link: "https://nutrisidietmu.vercel.app" },
+    { name: "BolaGass", icon: "⚽", cat: "Media Jurnalisme Olahraga", desc: "Platform jurnalisme sepak bola dengan ulasan taktis mendalam.", color: "border-orange-900/50", link: "#" },
+    { name: "GlowLogika", icon: "✨", cat: "Edukasi Skincare & Beauty", desc: "Media literasi kesehatan kulit berdasarkan sains serta fakta medis.", color: "border-pink-900/50", link: "#" },
+    { name: "CuanPintar", icon: "💰", cat: "Literasi Finansial & Investasi", desc: "Portal perencanaan keuangan harian dan investasi anak muda.", color: "border-blue-900/50", link: "#" }
 ];
 
 const businessServices = [
-    { name: "Web Dev & Techno", icon: Laptop, cat: "Pengembangan IT", desc: "Layanan pembuatan website korporat dan infrastruktur sistem digital.", color: "text-cyan-400 bg-cyan-950/30 border-cyan-900/50" },
-    { name: "Rayliziie Digital Invitation", icon: Globe, cat: "Undangan Digital Premium", desc: "Jasa perancangan undangan digital elegan untuk acara formal dan pernikahan.", color: "text-indigo-400 bg-indigo-950/30 border-indigo-900/50" }
+    { name: "Web Dev & Techno", icon: "💻", cat: "Pengembangan IT", desc: "Layanan pembuatan website korporat dan infrastruktur sistem digital.", color: "border-cyan-900/50" },
+    { name: "Rayliziie Digital Invitation", icon: "🌐", cat: "Undangan Digital Premium", desc: "Jasa perancangan undangan digital elegan untuk acara formal dan pernikahan.", color: "border-indigo-900/50" }
 ];
 
 const App = () => {
     const [view, setView] = useState('home'); // 'home', 'portal', 'admin-dashboard'
     const [portalMode, setPortalMode] = useState('login'); // 'login', 'register'
     
-    // Database State (Disimpan di localStorage biar ga hilang pas di-refresh)
+    // Database State (Disimpan di localStorage)
     const [users, setUsers] = useState(() => JSON.parse(localStorage.getItem('r_users')) || initialUsers);
     const [articles, setArticles] = useState(() => JSON.parse(localStorage.getItem('r_articles')) || []);
     
     // Session State
     const [currentUser, setCurrentUser] = useState(null);
-    const [isAdmin, setIsAdmin] = useState(false);
 
     // Form State
     const [loginEmail, setLoginEmail] = useState('');
@@ -44,7 +37,7 @@ const App = () => {
     const [artContent, setArtContent] = useState('');
     const [artImage, setArtImage] = useState(null);
 
-    // Sync ke localstorage setiap ada perubahan data
+    // Sync ke localstorage
     useEffect(() => { localStorage.setItem('r_users', JSON.stringify(users)); }, [users]);
     useEffect(() => { localStorage.setItem('r_articles', JSON.stringify(articles)); }, [articles]);
 
@@ -53,7 +46,7 @@ const App = () => {
         if (file) setArtImage(URL.createObjectURL(file));
     };
 
-    // ALUR 1: PENDAFTARAN RELAWAN (STATUS PENDING AUTOMATIC)
+    // 1. PENDAFTARAN RELAWAN
     const handleRegister = (e) => {
         e.preventDefault();
         if (users.find(u => u.email === regEmail)) {
@@ -66,12 +59,11 @@ const App = () => {
         setRegName(''); setRegEmail(''); setPortalMode('login');
     };
 
-    // ALUR 2: LOGIN CHECK (VERIFIKASI STATUS APPROVAL)
+    // 2. LOGIN CHECK
     const handleLogin = (e) => {
         e.preventDefault();
-        // bypass akun admin utama
         if (loginEmail === 'admin') {
-            setIsAdmin(true); setView('admin-dashboard');
+            setView('admin-dashboard');
             alert('Selamat Datang CEO Rayliziie Grup! Membuka Pusat Kendali Server...');
             setLoginEmail(''); return;
         }
@@ -88,7 +80,7 @@ const App = () => {
         setLoginEmail('');
     };
 
-    // ALUR 3: KIRIM ARTIKEL (MASUK STATUS PENDING REVIEW, TIDAK LANGSUNG TERBIT)
+    // 3. KIRIM ARTIKEL (PENDING)
     const handleCreateArticle = (e) => {
         e.preventDefault();
         const newArticle = {
@@ -98,111 +90,84 @@ const App = () => {
             content: artContent,
             image: artImage,
             author: currentUser.name,
-            status: 'Pending Review' // Status default tertahan
+            status: 'Pending Review'
         };
         setArticles([...articles, newArticle]);
         alert('Artikel sukses dikirim ke meja redaksi! Status: PENDING REVIEW. Menunggu peninjauan Admin.');
         setArtTitle(''); setArtContent(''); setArtImage(null);
     };
 
-    // FUNGSI ADMIN: APPROVE AKUN RELAWAN
     const approveUser = (email) => {
         setUsers(users.map(u => u.email === email ? { ...u, approved: true } : u));
+        alert('Akun relawan sukses di-approve!');
     };
 
-    // FUNGSI ADMIN: APPROVE PUBLISH ARTIKEL
     const approveArticle = (id) => {
         setArticles(articles.map(a => a.id === id ? { ...a, status: 'Published' } : a));
         alert('Artikel layak terbit! Status berubah menjadi PUBLISHED.');
     };
 
-    // FUNGSI ADMIN: TOLAK ARTIKEL
     const rejectArticle = (id) => {
         setArticles(articles.filter(a => a.id !== id));
-        alert('Artikel ditolak dan dihapus dari server redaksi.');
+        alert('Artikel ditolak dan dihapus dari server.');
     };
 
-    // SCREEN 1: PANEL DASHBOARD KENDALI ADMIN (CEO VIEW)
+    // MAIN SCREEN: ADMIN DASHBOARD
     if (view === 'admin-dashboard') {
         return (
-            <div className="min-h-screen bg-slate-950 text-slate-100 font-sans p-6">
-                <div className="mx-auto max-w-6xl">
-                    <div className="flex items-center justify-between border-b border-slate-800 pb-5 mb-8">
-                        <div className="flex items-center gap-3">
-                            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-600 shadow-lg shadow-purple-900/40">
-                                <Settings className="h-5 w-5 text-white" />
-                            </span>
-                            <div>
-                                <h1 className="text-xl font-950 text-white tracking-tight">RAYLIZIIE CENTRAL SERVER KENDALI</h1>
-                                <p className="text-xs text-purple-400 font-700 uppercase tracking-widest">Meja Kerja CEO / Super Admin</p>
-                            </div>
+            <div style={{ minHeight: '100vh', backgroundColor: '#0f172a', color: '#f8fafc', padding: '24px', fontFamily: 'sans-serif' }}>
+                <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+                    <div style={{ display: 'flex', justifyContent: 'between', alignItems: 'center', borderBottom: '1px solid #334155', paddingBottom: '20px', marginBottom: '30px' }}>
+                        <div>
+                            <h1 style={{ fontSize: '24px', fontWeight: '900', margin: 0 }}>⚙️ RAYLIZIIE CENTRAL SERVER</h1>
+                            <p style={{ fontSize: '12px', color: '#a78bfa', margin: '5px 0 0 0' }}>MEJA KERJA CEO / SUPER ADMIN</p>
                         </div>
-                        <button onClick={() => { setIsAdmin(false); setView('home'); }} className="text-xs font-700 bg-slate-800 px-4 py-2 rounded-full hover:bg-slate-700 transition-colors">Keluar Server</button>
+                        <button onClick={() => setView('home')} style={{ backgroundColor: '#334155', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '20px', cursor: 'pointer', fontWeight: '700' }}>Keluar Server</button>
                     </div>
 
-                    <div className="grid gap-8 md:grid-cols-3">
-                        {/* KENDALI 1: PENINJAUAN AKUN RELAWAN BARU */}
-                        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 h-fit">
-                            <h2 className="text-sm font-800 text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-                                <Users className="h-4 w-4 text-purple-400" /> Peninjauan Pendaftar ({users.filter(u=>!u.approved).length})
-                            </h2>
-                            <div className="space-y-3">
-                                {users.filter(u => !u.approved).length === 0 ? (
-                                    <p className="text-xs text-slate-500 italic">Tidak ada pendaftar baru saat ini.</p>
-                                ) : (
-                                    users.filter(u => !u.approved).map(u => (
-                                        <div key={u.email} className="p-3 bg-slate-950 rounded-xl border border-slate-800/80 flex items-center justify-between">
-                                            <div>
-                                                <p className="text-xs font-700 text-white">{u.name}</p>
-                                                <p className="text-[10px] text-slate-500">{u.email}</p>
-                                            </div>
-                                            <button onClick={() => approveUser(u.email)} className="bg-emerald-600 hover:bg-emerald-500 text-white p-1.5 rounded-lg transition-colors">
-                                                <Check className="h-3.5 w-3.5" />
-                                            </button>
+                    <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+                        {/* APPROVAL USER */}
+                        <div style={{ flex: '1', minWidth: '300px', backgroundColor: '#1e293b', border: '1px solid #334155', padding: '20px', borderRadius: '16px' }}>
+                            <h2 style={{ fontSize: '14px', fontWeight: '800', margin: '0 0 20px 0' }}>👥 PENINJAUAN PENDAFTAR ({users.filter(u=>!u.approved).length})</h2>
+                            {users.filter(u => !u.approved).length === 0 ? (
+                                <p style={{ fontSize: '12px', color: '#64748b', italic: 'true' }}>Tidak ada pendaftar baru.</p>
+                            ) : (
+                                users.filter(u => !u.approved).map(u => (
+                                    <div key={u.email} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', backgroundColor: '#0f172a', borderRadius: '12px', marginBottom: '10px' }}>
+                                        <div>
+                                            <p style={{ fontSize: '12px', fontWeight: '700', margin: 0 }}>{u.name}</p>
+                                            <p style={{ fontSize: '10px', color: '#64748b', margin: 0 }}>{u.email}</p>
                                         </div>
-                                    ))
-                                )}
-                            </div>
+                                        <button onClick={() => approveUser(u.email)} style={{ backgroundColor: '#10b981', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontWeight: '700' }}>Approve</button>
+                                    </div>
+                                ))
+                            )}
                         </div>
 
-                        {/* KENDALI 2: MEJA PENINJAUAN LAYAK TERBIT ARTIKEL */}
-                        <div className="md:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-5">
-                            <h2 className="text-sm font-800 text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-                                <FileText className="h-4 w-4 text-indigo-400" /> Meja Sensor Kelayakan Berita ({articles.filter(a=>a.status==='Pending Review').length})
-                            </h2>
-                            <div className="space-y-4">
-                                {articles.filter(a => a.status === 'Pending Review').length === 0 ? (
-                                    <p className="text-xs text-slate-500 italic">Bersih! Tidak ada draf artikel yang menunggu peninjauan.</p>
-                                ) : (
-                                    articles.filter(a => a.status === 'Pending Review').map(a => (
-                                        <div key={a.id} className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-3">
-                                            <div className="flex items-start justify-between">
-                                                <div>
-                                                    <span className="text-[9px] font-700 uppercase tracking-wider text-indigo-400 bg-indigo-950/40 border border-indigo-900/30 px-2 py-0.5 rounded">
-                                                        Target: {a.category.toUpperCase()}
-                                                    </span>
-                                                    <h3 className="text-base font-800 text-white mt-1.5">{a.title}</h3>
-                                                    <p className="text-[10px] text-slate-500 mt-0.5">Oleh Kontributor: {a.author}</p>
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    <button onClick={() => approveArticle(a.id)} className="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-700 flex items-center gap-1">
-                                                        <Check className="h-3 w-3" /> Terbitkan
-                                                    </button>
-                                                    <button onClick={() => rejectArticle(a.id)} className="bg-red-950 text-red-400 border border-red-900 px-3 py-1.5 rounded-lg text-xs font-700 flex items-center gap-1">
-                                                        <X className="h-3 w-3" /> Tolak
-                                                    </button>
-                                                </div>
+                        {/* APPROVAL ARTIKEL */}
+                        <div style={{ flex: '2', minWidth: '400px', backgroundColor: '#1e293b', border: '1px solid #334155', padding: '20px', borderRadius: '16px' }}>
+                            <h2 style={{ fontSize: '14px', fontWeight: '800', margin: '0 0 20px 0' }}>📝 MEJA SENSOR KELAYAKAN BERITA ({articles.filter(a=>a.status==='Pending Review').length})</h2>
+                            {articles.filter(a => a.status === 'Pending Review').length === 0 ? (
+                                <p style={{ fontSize: '12px', color: '#64748b' }}>Bersih! Tidak ada draf artikel baru.</p>
+                            ) : (
+                                articles.filter(a => a.status === 'Pending Review').map(a => (
+                                    <div key={a.id} style={{ padding: '16px', backgroundColor: '#0f172a', borderRadius: '12px', marginBottom: '15px', border: '1px solid #334155' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                                            <div>
+                                                <span style={{ fontSize: '9px', fontWeight: '700', color: '#818cf8', backgroundColor: '#1e1b4b', padding: '2px 6px', borderRadius: '4px' }}>{a.category.toUpperCase()}</span>
+                                                <h3 style={{ fontSize: '16px', fontWeight: '800', margin: '8px 0 4px 0' }}>{a.title}</h3>
+                                                <p style={{ fontSize: '10px', color: '#64748b', margin: 0 }}>Penulis: {a.author}</p>
                                             </div>
-                                            <p className="text-xs text-slate-400 bg-slate-900 p-3 rounded-lg leading-relaxed whitespace-pre-wrap">{a.content}</p>
-                                            {a.image && (
-                                                <div className="w-32 h-20 border border-slate-800 rounded-lg overflow-hidden">
-                                                    <img src={a.image} alt="Cover" className="w-full h-full object-cover" />
-                                                </div>
-                                            )}
+                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                                <button onClick={() => approveArticle(a.id)} style={{ backgroundColor: '#10b981', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontWeight: '700', fontSize: '11px' }}>Terbitkan</button>
+                                                <button onClick={() => rejectArticle(a.id)} style={{ backgroundColor: '#7f1d1d', color: '#fca5a5', border: '1px solid #991b1b', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontWeight: '700', fontSize: '11px' }}>Tolak</button>
+                                            </div>
                                         </div>
-                                    ))
-                                )}
-                            </div>
+                                        <p style={{ fontSize: '12px', color: '#cbd5e1', lineHeight: '1.6', marginTop: '12px', whiteSpace: 'pre-wrap' }}>{a.content}</p>
+                                        {a.image && <img src={a.image} style={{ width: '120px', height: '80px', objectCover: 'cover', borderRadius: '8px', marginTop: '10px' }} />}
+                                    </div>
+                                ))
+                            )}
                         </div>
                     </div>
                 </div>
@@ -210,103 +175,90 @@ const App = () => {
         );
     }
 
-    // SCREEN 2: PORTAL PENULIS & REGISTRASI (WRITER INTERFACE)
+    // SCREEN 2: WRITER PORTAL (LOGIN & DAFTAR)
     if (view === 'portal') {
         return (
-            <div className="min-h-screen bg-slate-950 text-slate-100 font-sans p-6">
-                <div className="mx-auto max-w-4xl">
-                    <div className="flex items-center justify-between border-b border-slate-800 pb-5 mb-8">
-                        <div className="flex items-center gap-3">
-                            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600">
-                                <FileText className="h-4 w-4 text-white" />
-                            </span>
-                            <div>
-                                <h1 className="text-lg font-900 text-white">RAYLIZIIE CMS PORTAL</h1>
-                                <p className="text-[10px] text-indigo-400 font-600 uppercase tracking-wider">
-                                    {currentUser ? `Sesi Kerja: ${currentUser.name}` : 'Gerbang Otentikasi Penulis'}
-                                </p>
-                            </div>
-                        </div>
-                        <button onClick={() => { setView('home'); setCurrentUser(null); }} className="text-xs font-700 bg-slate-800 px-4 py-2 rounded-full hover:bg-slate-700 transition-colors">Kembali</button>
+            <div style={{ minHeight: '100vh', backgroundColor: '#0f172a', color: '#f8fafc', padding: '24px', fontFamily: 'sans-serif' }}>
+                <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #334155', paddingBottom: '20px', marginBottom: '30px' }}>
+                        <h1 style={{ fontSize: '20px', fontWeight: '900', margin: 0 }}>📁 RAYLIZIIE CMS PORTAL</h1>
+                        <button onClick={() => setView('home')} style={{ backgroundColor: '#334155', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', fontWeight: '700' }}>Kembali</button>
                     </div>
 
                     {!currentUser ? (
-                        <div className="w-full max-w-md mx-auto bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl mt-8">
-                            <div className="flex border-b border-slate-800 mb-6">
-                                <button onClick={() => setPortalMode('login')} className={`w-1/2 pb-3 text-xs font-800 uppercase border-b-2 transition-all ${portalMode === 'login' ? 'border-indigo-500 text-white' : 'border-transparent text-slate-500'}`}>Log In</button>
-                                <button onClick={() => setPortalMode('register')} className={`w-1/2 pb-3 text-xs font-800 uppercase border-b-2 transition-all ${portalMode === 'register' ? 'border-indigo-500 text-white' : 'border-transparent text-slate-500'}`}>Daftar Relawan</button>
+                        <div style={{ maxWidth: '400px', margin: '40px auto', backgroundColor: '#1e293b', border: '1px solid #334155', padding: '24px', borderRadius: '16px' }}>
+                            <div style={{ display: 'flex', borderBottom: '1px solid #334155', marginBottom: '20px' }}>
+                                <button onClick={() => setPortalMode('login')} style={{ width: '50%', paddingBottom: '10px', background: 'none', border: 'none', color: portalMode === 'login' ? '#fff' : '#64748b', fontWeight: '800', cursor: 'pointer', borderBottom: portalMode === 'login' ? '2px solid #6366f1' : 'none' }}>LOG IN</button>
+                                <button onClick={() => setPortalMode('register')} style={{ width: '50%', paddingBottom: '10px', background: 'none', border: 'none', color: portalMode === 'register' ? '#fff' : '#64748b', fontWeight: '800', cursor: 'pointer', borderBottom: portalMode === 'register' ? '2px solid #6366f1' : 'none' }}>DAFTAR RELAWAN</button>
                             </div>
 
                             {portalMode === 'login' ? (
-                                <form onSubmit={handleLogin} className="space-y-4">
-                                    <div className="flex items-center gap-2 text-amber-400 font-700 text-[10px] uppercase tracking-wider mb-1"><Lock className="h-3.5 w-3.5" /> Security Validation</div>
+                                <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                                     <div>
-                                        <label className="block text-[10px] font-700 text-slate-400 mb-1.5 uppercase">Masukkan Email Terverifikasi</label>
-                                        <input type="text" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} placeholder="Ketik email atau 'admin'..." required className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500" />
+                                        <label style={{ fontSize: '10px', fontWeight: '700', color: '#94a3b8', display: 'block', marginBottom: '6px' }}>EMAIL TERVERIFIKASI</label>
+                                        <input type="text" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} placeholder="Ketik email atau 'admin'..." required style={{ width: '100%', padding: '10px', backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#fff', boxSizing: 'border-box' }} />
                                     </div>
-                                    <button type="submit" className="w-full bg-white text-slate-900 font-700 text-xs py-3 rounded-xl hover:bg-indigo-600 hover:text-white transition-all">Verifikasi Akun</button>
+                                    <button type="submit" style={{ backgroundColor: '#fff', color: '#0f172a', padding: '12px', borderRadius: '8px', border: 'none', fontWeight: '700', cursor: 'pointer' }}>Masuk Panel</button>
                                 </form>
                             ) : (
-                                <form onSubmit={handleRegister} className="space-y-4">
-                                    <div className="flex items-center gap-2 text-indigo-400 font-700 text-[10px] uppercase tracking-wider mb-1"><UserPlus className="h-3.5 w-3.5" /> Form Kemitraan Kontributor</div>
+                                <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                                     <div>
-                                        <label className="block text-[10px] font-700 text-slate-400 mb-1.5 uppercase">Nama Lengkap</label>
-                                        <input type="text" value={regName} onChange={(e) => setRegName(e.target.value)} placeholder="Masukkan nama..." required className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500" />
+                                        <label style={{ fontSize: '10px', fontWeight: '700', color: '#94a3b8', display: 'block', marginBottom: '6px' }}>NAMA LENGKAP</label>
+                                        <input type="text" value={regName} onChange={(e) => setRegName(e.target.value)} placeholder="Nama Anda..." required style={{ width: '100%', padding: '10px', backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#fff', boxSizing: 'border-box' }} />
                                     </div>
                                     <div>
-                                        <label className="block text-[10px] font-700 text-slate-400 mb-1.5 uppercase">Alamat Email</label>
-                                        <input type="email" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} placeholder="name@example.com" required className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500" />
+                                        <label style={{ fontSize: '10px', fontWeight: '700', color: '#94a3b8', display: 'block', marginBottom: '6px' }}>ALAMAT EMAIL</label>
+                                        <input type="email" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} placeholder="name@example.com" required style={{ width: '100%', padding: '10px', backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#fff', boxSizing: 'border-box' }} />
                                     </div>
-                                    <button type="submit" className="w-full bg-indigo-600 text-white font-700 text-xs py-3 rounded-xl hover:bg-indigo-500 transition-all">Kirim Berkas Pendaftaran</button>
+                                    <button type="submit" style={{ backgroundColor: '#6366f1', color: '#fff', padding: '12px', borderRadius: '8px', border: 'none', fontWeight: '700', cursor: 'pointer' }}>Ajukan Relawan</button>
                                 </form>
                             )}
                         </div>
                     ) : (
-                        // FORM MENULIS JIKA AKUN SUDAH LOGGED IN DAN DI-APPROVE
-                        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
-                            <div className="flex items-center justify-between mb-6">
-                                <div className="text-sm font-800 text-white uppercase tracking-wider flex items-center gap-2"><PlusCircle className="h-4 w-4 text-indigo-400" /> Ruang Tulis Konten</div>
-                                <span className="text-[10px] font-700 text-emerald-400 bg-emerald-950/50 border border-emerald-900/50 px-2.5 py-1 rounded-md flex items-center gap-1"><Unlock className="h-3 w-3" /> Otoritas Terverifikasi</span>
+                        // WRITER FORM
+                        <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', padding: '24px', borderRadius: '16px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+                                <h2 style={{ fontSize: '14px', fontWeight: '800', margin: 0 }}>✍️ RUANG TULIS KONTEN KONTRIBUTOR</h2>
+                                <span style={{ fontSize: '10px', color: '#10b981', fontWeight: '700' }}>● Terverifikasi</span>
                             </div>
-                            <form onSubmit={handleCreateArticle} className="space-y-5">
-                                <div className="grid gap-5 md:grid-cols-3">
-                                    <div className="md:col-span-2 space-y-5">
+                            <form onSubmit={handleCreateArticle} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+                                    <div style={{ flex: '2', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                                         <div>
-                                            <label className="block text-xs font-700 text-slate-400 mb-2 uppercase">Judul Artikel</label>
-                                            <input type="text" value={artTitle} onChange={(e) => setArtTitle(e.target.value)} placeholder="Ketik judul berita memikat..." required className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500" />
+                                            <label style={{ fontSize: '12px', fontWeight: '700', color: '#94a3b8' }}>JUDUL ARTIKEL</label>
+                                            <input type="text" value={artTitle} onChange={(e) => setArtTitle(e.target.value)} placeholder="Judul berita memikat..." required style={{ width: '100%', padding: '12px', backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#fff', marginTop: '6px', boxSizing: 'border-box' }} />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-700 text-slate-400 mb-2 uppercase">Target Divisi Media</label>
-                                            <div className="grid grid-cols-2 gap-2">
-                                                {['gizi', 'bola', 'skincare', 'keuangan'].map((cat) => (
-                                                    <label key={cat} className={`p-2.5 rounded-xl border text-xs font-700 text-center cursor-pointer select-none tracking-wide uppercase ${artCategory === cat ? 'bg-indigo-600/10 border-indigo-500 text-white' : 'bg-slate-950 border-slate-800 text-slate-500'}`}>
-                                                        <input type="radio" name="artCategory" value={cat} checked={artCategory === cat} onChange={() => setArtCategory(cat)} className="sr-only" />
-                                                        {cat}
-                                                    </label>
-                                                ))}
-                                            </div>
+                                            <label style={{ fontSize: '12px', fontWeight: '700', color: '#94a3b8' }}>TARGET DIVISI MEDIA</label>
+                                            <select value={artCategory} onChange={(e) => setArtCategory(e.target.value)} style={{ width: '100%', padding: '12px', backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#fff', marginTop: '6px', boxSizing: 'border-box' }}>
+                                                <option value="gizi">NutrisiDietMu</option>
+                                                <option value="bola">BolaGass</option>
+                                                <option value="skincare">GlowLogika</option>
+                                                <option value="keuangan">CuanPintar</option>
+                                            </select>
                                         </div>
                                     </div>
-                                    <div>
-                                        <label className="block text-xs font-700 text-slate-400 mb-2 uppercase">Gambar / Foto Pendukung</label>
-                                        <div className="h-[140px] bg-slate-950 border-2 border-dashed border-slate-800 rounded-xl flex flex-col items-center justify-center p-4 relative group hover:border-indigo-500/50 transition-colors">
+                                    <div style={{ flex: '1', minWidth: '150px' }}>
+                                        <label style={{ fontSize: '12px', fontWeight: '700', color: '#94a3b8' }}>GAMBAR / COVER</label>
+                                        <div style={{ height: '130px', backgroundColor: '#0f172a', border: '2px dashed #334155', borderRadius: '8px', marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
                                             {artImage ? (
-                                                <img src={artImage} alt="Preview" className="w-full h-full object-cover rounded-lg" />
+                                                <img src={artImage} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                             ) : (
-                                                <label className="flex flex-col items-center justify-center cursor-pointer w-full h-full">
-                                                    <Image className="h-5 w-5 text-slate-500 mb-1" />
-                                                    <span className="text-[10px] text-slate-400">Pilih Gambar</span>
-                                                    <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                                                <label style={{ cursor: 'pointer', textAlign: 'center', fontSize: '11px', color: '#64748b' }}>
+                                                    📁 Pilih File
+                                                    <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
                                                 </label>
                                             )}
                                         </div>
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-700 text-slate-400 mb-2 uppercase">Isi Tulisan Berita</label>
-                                    <textarea rows="6" value={artContent} onChange={(e) => setArtContent(e.target.value)} placeholder="Ketik narasi berita lu secara mendalam di sini, Boy..." required className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 resize-none"></textarea>
+                                    <label style={{ fontSize: '12px', fontWeight: '700', color: '#94a3b8' }}>ISI TULISAN BERITA</label>
+                                    <textarea rows="6" value={artContent} onChange={(e) => setArtContent(e.target.value)} placeholder="Ketik narasi berita lu di sini, Boy..." required style={{ width: '100%', padding: '12px', backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#fff', marginTop: '6px', resize: 'none', boxSizing: 'border-box' }}></textarea>
                                 </div>
-                                <div className="flex justify-end"><button type="submit" className="bg-white text-slate-900 font-700 text-xs px-6 py-3 rounded-xl hover:bg-indigo-600 hover:text-white transition-all shadow-md">Ajukan ke Redaksi</button></div>
+                                <div style={{ display: 'flex', justifyContent: 'end' }}>
+                                    <button type="submit" style={{ backgroundColor: '#fff', color: '#0f172a', padding: '12px 24px', border: 'none', borderRadius: '8px', fontWeight: '700', cursor: 'pointer' }}>Ajukan ke Redaksi</button>
+                                </div>
                             </form>
                         </div>
                     )}
@@ -315,118 +267,81 @@ const App = () => {
         );
     }
 
-    // SCREEN 3: LANDING PAGE DEPAN UTAMA (PUBLIC VIEW)
+    // SCREEN 3: PUBLIC LANDING PAGE
     return (
-        <div className="min-h-screen bg-slate-900 text-slate-100 font-sans selection:bg-indigo-600 selection:text-white antialiased">
-            <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-900/90 backdrop-blur-md">
-                <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-                    <div className="flex items-center gap-3">
-                        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 shadow-lg shadow-indigo-900/40"><Layers className="h-5 w-5 text-white" /></span>
-                        <div>
-                            <span className="font-display text-lg font-900 tracking-tight text-white block">RAYLIZIIE MEDIA DIGITAL</span>
-                            <span className="text-[9px] font-700 tracking-widest text-indigo-400 uppercase block -mt-0.5">Rayliziie Grup Subsidiary</span>
-                        </div>
+        <div style={{ minHeight: '100vh', backgroundColor: '#0f172a', color: '#f8fafc', fontFamily: 'sans-serif', margin: 0, padding: 0 }}>
+            {/* Header */}
+            <header style={{ borderBottom: '1px solid #1e293b', backgroundColor: '#0f172a', position: 'sticky', top: 0, zIndex: 50 }}>
+                <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                        <span style={{ fontSize: '18px', fontWeight: '900', color: '#fff' }}>RAYLIZIIE MEDIA DIGITAL</span>
+                        <span style={{ fontSize: '9px', color: '#818cf8', display: 'block', fontWeight: '700', letterSpacing: '1px' }}>RAYLIZIIE GRUP SUBSIDIARY</span>
                     </div>
-                    <button onClick={() => setView('portal')} className="rounded-full bg-white px-5 py-2 text-xs font-700 text-slate-900 transition-all hover:bg-indigo-500 hover:text-white shadow-sm">Portal Admin & Relawan</button>
+                    <button onClick={() => setView('portal')} style={{ backgroundColor: '#fff', color: '#0f172a', border: 'none', padding: '10px 20px', borderRadius: '20px', fontWeight: '700', cursor: 'pointer' }}>Portal Admin & Relawan</button>
                 </div>
             </header>
 
-            {/* Hero & Stat Sections */}
-            <section className="relative overflow-hidden pt-24 pb-16 text-center md:pt-32 md:pb-24">
-                <div className="mx-auto max-w-4xl px-6 relative z-10">
-                    <span className="inline-flex items-center gap-2 rounded-full border border-slate-800 bg-slate-800/60 px-4 py-1.5 text-xs font-600 uppercase tracking-wider text-indigo-400"><ShieldCheck className="h-3.5 w-3.5" /> Divisi Informasi & Teknologi Global</span>
-                    <h1 className="mt-6 font-display text-4xl font-900 leading-[1.1] text-white md:text-6xl">Navigasi Masa Depan <br /><span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Ekosistem Media Siber Terintegrasi</span></h1>
-                    <p className="mx-auto mt-6 max-w-2xl text-sm md:text-base text-slate-400">Rayliziie Media Digital memimpin orkestrasi portal berita multi-sektor dan penyediaan infrastruktur teknologi terapan untuk mendorong penetrasi literasi digital secara profesional.</p>
-                </div>
+            {/* Hero */}
+            <section style={{ textAlign: 'center', padding: '60px 20px' }}>
+                <span style={{ fontSize: '11px', color: '#818cf8', border: '1px solid #334155', padding: '6px 12px', borderRadius: '20px', fontWeight: '600' }}>🛡️ DIVISI INFORMASI & TEKNOLOGI GLOBAL</span>
+                <h1 style={{ fontSize: '40px', fontWeight: '950', color: '#fff', marginTop: '20px', marginBottom: '10px' }}>Navigasi Masa Depan</h1>
+                <p style={{ fontSize: '28px', fontWeight: '900', background: 'linear-gradient(to right, #818cf8, #c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0 }}>Ekosistem Media Siber Terintegrasi</p>
+                <p style={{ maxWidth: '600px', margin: '20px auto 0 auto', fontSize: '14px', color: '#94a3b8', lineHeight: '1.6' }}>Rayliziie Media Digital memimpin orkestrasi portal berita multi-sektor dan penyediaan infrastruktur teknologi terapan untuk mendorong penetrasi literasi digital secara profesional.</p>
             </section>
 
-            <section className="mx-auto max-w-6xl px-6 mb-20">
-                <div className="grid gap-6 sm:grid-cols-3 border border-slate-800 bg-slate-900 rounded-2xl p-6 shadow-xl">
-                    {stats.map((s) => (
-                        <div key={s.label} className="flex items-center gap-4 p-4 rounded-xl bg-slate-950/40 border border-slate-800/50">
-                            <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-950 text-indigo-400"><s.icon className="h-5 w-5" /></span>
-                            <div><p className="text-2xl font-800 text-white tracking-tight">{s.value}</p><p className="text-xs text-slate-500 font-500">{s.label}</p></div>
+            {/* Grid Media Network */}
+            <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px 80px 20px' }}>
+                <h2 style={{ fontSize: '12px', color: '#64748b', letterSpacing: '2px', borderBottom: '1px solid #1e293b', paddingBottom: '10px', marginBottom: '30px' }}>DIGITAL MEDIA NETWORK</h2>
+                <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginBottom: '6px' }}>
+                    {mediaNetwork.map((item) => (
+                        <div key={item.name} style={{ flex: '1', minWidth: '280px', backgroundColor: '#1e293b', border: '1px solid #334155', padding: '24px', borderRadius: '16px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                            <div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <span style={{ fontSize: '24px' }}>{item.icon}</span>
+                                    <div>
+                                        <h3 style={{ fontSize: '18px', fontWeight: '800', margin: 0, color: '#fff' }}>{item.name}</h3>
+                                        <p style={{ fontSize: '10px', color: '#818cf8', margin: 0, fontWeight: '700' }}>{item.cat}</p>
+                                    </div>
+                                </div>
+                                <p style={{ fontSize: '13px', color: '#94a3b8', lineHeight: '1.5', marginTop: '14px' }}>{item.desc}</p>
+                                
+                                {/* TEMPAT ARTIKEL LIVE SIBER YANG SUDAH DI-APPROVE */}
+                                <div style={{ marginTop: '15px' }}>
+                                    {articles.filter(a => a.category === (item.name === 'NutrisiDietMu' ? 'gizi' : item.name === 'BolaGass' ? 'bola' : item.name === 'GlowLogika' ? 'skincare' : 'keuangan') && a.status === 'Published').map(art => (
+                                        <div key={art.id} style={{ padding: '10px', backgroundColor: '#0f172a', borderRadius: '8px', fontSize: '12px', display: 'flex', gap: '10px', alignItems: 'center', marginTop: '8px' }}>
+                                            {art.image && <img src={art.image} style={{ width: '35px', height: '35px', objectFit: 'cover', borderRadius: '4px' }} />}
+                                            <div>
+                                                <h4 style={{ margin: 0, color: '#f1f5f9', fontWeight: '700' }}>{art.title}</h4>
+                                                <p style={{ margin: 0, fontSize: '9px', color: '#64748b' }}>Oleh: {art.author}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div style={{ marginTop: '20px', paddingTop: '14px', borderTop: '1px solid #0f172a', display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+                                <a href={item.link} target="_blank" rel="noopener noreferrer" style={{ color: '#fff', textDecoration: 'none', fontWeight: '600' }}>Kunjungi Platform ↗</a>
+                                <span style={{ color: '#34d399', fontSize: '10px', fontWeight: '700' }}>● Active Server</span>
+                            </div>
                         </div>
                     ))}
                 </div>
-            </section>
 
-            {/* Grid Publik Lini Bisnis */}
-            <main className="mx-auto max-w-7xl px-6 pb-28 space-y-20">
-                <div>
-                    <div className="relative mb-8 flex items-center gap-4">
-                        <h2 className="font-display text-xs font-800 tracking-widest text-slate-400 uppercase">Digital Media Network</h2>
-                        <div className="h-px flex-1 bg-slate-800"></div>
-                    </div>
-                    <div className="grid gap-6 sm:grid-cols-2">
-                        {mediaNetwork.map((item) => (
-                            <div key={item.name} className="group relative flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-950/50 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-slate-700 hover:bg-slate-950">
+                <h2 style={{ fontSize: '12px', color: '#64748b', letterSpacing: '2px', borderBottom: '1px solid #1e293b', paddingBottom: '10px', marginTop: '50px', marginBottom: '30px' }}>DIGITAL BUSINESS SERVICES</h2>
+                <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+                    {businessServices.map((item) => (
+                        <div key={item.name} style={{ flex: '1', minWidth: '280px', backgroundColor: '#1e293b', border: '1px solid #334155', padding: '24px', borderRadius: '16px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <span style={{ fontSize: '24px' }}>{item.icon}</span>
                                 <div>
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-3.5">
-                                            <span className="flex h-11 w-11 items-center justify-center rounded-xl border bg-slate-900 text-indigo-400 border-slate-800 group-hover:text-white transition-colors"><item.icon className="h-5 w-5" /></span>
-                                            <div>
-                                                <h3 className="font-800 text-base text-white tracking-tight">{item.name}</h3>
-                                                <p className="text-[10px] text-indigo-400 font-600 uppercase tracking-wider">{item.cat}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <p className="mt-4 text-sm leading-relaxed text-slate-400">{item.desc}</p>
-                                    
-                                    {/* ARTIKEL YANG SUDAH DI-APPROVE OLEH ADMIN AKAN MUNCUL DI SINI SECARA LIVE */}
-                                    <div className="mt-4 space-y-2">
-                                        {articles.filter(a => a.category === (item.name === 'NutrisiDietMu' ? 'gizi' : item.name === 'BolaGass' ? 'bola' : item.name === 'GlowLogika' ? 'skincare' : 'keuangan') && a.status === 'Published').map(art => (
-                                            <div key={art.id} className="p-2.5 bg-slate-900/60 border border-slate-800/60 rounded-xl text-xs flex gap-3 items-center">
-                                                {art.image && <img src={art.image} className="w-10 h-10 object-cover rounded-md" />}
-                                                <div>
-                                                    <h4 className="font-700 text-slate-200 line-clamp-1">{art.title}</h4>
-                                                    <p className="text-[9px] text-slate-500">Oleh: {art.author}</p>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className="mt-6 pt-4 border-t border-slate-900 flex items-center justify-between text-xs font-600 text-slate-500">
-                                    <a href={item.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:text-white transition-colors">Kunjungi Platform <ArrowUpRight className="h-3.5 w-3.5" /></a>
-                                    <span className="text-[10px] text-emerald-400 bg-emerald-950/50 border border-emerald-900/50 px-2.5 py-0.5 rounded-md font-600">Active Network</span>
+                                    <h3 style={{ fontSize: '18px', fontWeight: '800', margin: 0, color: '#fff' }}>{item.name}</h3>
+                                    <p style={{ fontSize: '10px', color: '#c084fc', margin: 0, fontWeight: '700' }}>{item.cat}</p>
                                 </div>
                             </div>
-                        ))}
-                    </div>
-                </div>
-
-                <div>
-                    <div className="relative mb-8 flex items-center gap-4">
-                        <h2 className="font-display text-xs font-800 tracking-widest text-slate-400 uppercase">Digital Business Services</h2>
-                        <div className="h-px flex-1 bg-slate-800"></div>
-                    </div>
-                    <div className="grid gap-6 sm:grid-cols-2">
-                        {businessServices.map((item) => (
-                            <div key={item.name} className="group relative flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-950/50 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-slate-700 hover:bg-slate-950">
-                                <div>
-                                    <div className="flex items-center gap-3.5">
-                                        <span className="flex h-11 w-11 items-center justify-center rounded-xl border bg-slate-900 border-slate-800 text-purple-400 group-hover:text-white transition-colors"><item.icon className="h-5 w-5" /></span>
-                                        <div>
-                                            <h3 className="font-800 text-base text-white tracking-tight">{item.name}</h3>
-                                            <p className="text-[10px] text-purple-400 font-600 uppercase tracking-wider">{item.cat}</p>
-                                        </div>
-                                    </div>
-                                    <p className="mt-4 text-sm leading-relaxed text-slate-400">{item.desc}</p>
-                                </div>
-                                <div className="mt-6 pt-4 border-t border-slate-900 flex items-center justify-between text-xs font-600 text-slate-500">
-                                    <span className="flex items-center gap-1 hover:text-white cursor-pointer transition-colors">Integrasi Layanan <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" /></span>
-                                    <span className="text-[10px] text-purple-400 bg-purple-950/50 border border-purple-900/50 px-2.5 py-0.5 rounded-md font-600">Enterprise Solution</span>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                            <p style={{ fontSize: '13px', color: '#94a3b8', lineHeight: '1.5', marginTop: '14px' }}>{item.desc}</p>
+                        </div>
+                    ))}
                 </div>
             </main>
-
-            <footer className="border-t border-slate-800 bg-slate-950/60 py-12 text-center text-xs text-slate-500">
-                <p>&copy; 2026 Rayliziie Media Digital. Seluruh Hak Cipta Dilindungi.</p>
-                <p className="mt-1 font-600 text-indigo-400 tracking-wide">Menaungi NutrisiDietMu, BolaGass, GlowLogika & CuanPintar &middot; Medan, Sumatera Utara.</p>
-            </footer>
         </div>
     );
 };
