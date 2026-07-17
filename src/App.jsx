@@ -67,7 +67,6 @@ const stats = [
 const App = () => {
     return (
         <div className="min-h-screen bg-slate-900 text-slate-100 font-sans selection:bg-indigo-600 selection:text-white antialiased">
-            
             <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-900/90 backdrop-blur-md">
                 <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
                     <div className="flex items-center gap-3">
@@ -84,7 +83,6 @@ const App = () => {
                     </button>
                 </div>
             </header>
-
             <section className="relative overflow-hidden pt-24 pb-16 text-center md:pt-32 md:pb-24">
                 <div className="mx-auto max-w-4xl px-6 relative z-10">
                     <motion.span 
@@ -93,7 +91,6 @@ const App = () => {
                     >
                         <ShieldCheck className="h-3.5 w-3.5 text-indigo-400" /> Divisi Informasi & Teknologi Global
                     </motion.span>
-                    
                     <motion.h1 
                         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
                         className="mt-6 font-display text-4xl font-900 leading-[1.1] tracking-tight text-white md:text-6xl"
@@ -101,7 +98,6 @@ const App = () => {
                         Navigasi Masa Depan <br />
                         <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Ekosistem Media Siber Terintegrasi</span>
                     </motion.h1>
-
                     <motion.p 
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}
                         className="mx-auto mt-6 max-w-2xl text-base md:text-lg leading-relaxed text-slate-400"
@@ -110,7 +106,6 @@ const App = () => {
                     </motion.p>
                 </div>
             </section>
-
             <section className="mx-auto max-w-6xl px-6 mb-20">
                 <div className="grid gap-6 sm:grid-cols-3 border border-slate-800 bg-slate-900 rounded-2xl p-6 shadow-xl">
                     {stats.map((s, i) => (
@@ -126,7 +121,6 @@ const App = () => {
                     ))}
                 </div>
             </section>
-
             <main className="mx-auto max-w-7xl px-6 pb-28 space-y-20">
                 <div>
                     <div className="relative mb-8 flex items-center gap-4">
@@ -160,7 +154,6 @@ const App = () => {
                         ))}
                     </div>
                 </div>
-
                 <div>
                     <div className="relative mb-8 flex items-center gap-4">
                         <h2 className="font-display text-xs font-800 tracking-widest text-slate-400 uppercase">Digital Business Services</h2>
@@ -192,7 +185,6 @@ const App = () => {
                     </div>
                 </div>
             </main>
-
             <footer className="border-t border-slate-800 bg-slate-950/60">
                 <div className="mx-auto max-w-7xl px-6 py-12 text-center text-xs text-slate-500">
                     <p>&copy; 2026 Rayliziie Media Digital. Seluruh Hak Cipta Dilindungi.</p>
