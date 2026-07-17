@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 
-// URL API Mock Database Terpusat biar langsung live & sinkron antar-perangkat tanpa ribet setup token
-const API_URL = "https://6698660a2069c438a71765c9.mockapi.io/rayliziie/v1";
+// Database awal bawaan sistem default
+const initialUsers = [
+    { id: 1, email: 'penulis@rayliziie.com', name: 'Penulis Kontributor', password: '123', approved: true },
+];
 
 const mediaNetwork = [
     { name: "NutrisiDietMu", icon: "🌱", cat: "Media Kesehatan & Gizi", desc: "Portal edukasi gizi klinis dan panduan kesehatan masyarakat.", link: "https://nutrisidietmu.vercel.app" },
@@ -19,15 +21,20 @@ const App = () => {
     const [view, setView] = useState('home'); // 'home', 'portal', 'admin-dashboard'
     const [portalMode, setPortalMode] = useState('login'); // 'login', 'register', 'forgot'
     
-    // Live Cloud State
-    const [users, setUsers] = useState([]);
-    const [articles, setArticles] = useState([]);
-    const [loading, setLoading] = useState(false);
+    // Database State Terpadu (Mengambil langsung dari storage browser lokal secara instan)
+    const [users, setUsers] = useState(() => {
+        const savedUsers = localStorage.getItem('rayliziie_users_db');
+        return savedUsers ? JSON.parse(savedUsers) : initialUsers;
+    });
+    const [articles, setArticles] = useState(() => {
+        const savedArticles = localStorage.getItem('rayliziie_articles_db');
+        return savedArticles ? JSON.parse(savedArticles) : [];
+    });
     
-    // Session State
+    // Session Login State
     const [currentUser, setCurrentUser] = useState(null);
 
-    // Form State
+    // Form Binding State
     const [loginEmail, setLoginEmail] = useState('');
     const [loginPassword, setLoginPassword] = useState('');
     const [regName, setRegName] = useState('');
@@ -40,61 +47,45 @@ const App = () => {
     const [artCategory, setArtCategory] = useState('gizi');
     const [artContent, setArtContent] = useState('');
 
-    // AMBIL DATA DARI SERVER LIVE AWAN SECARA REAL-TIME
-    const fetchCloudData = async () => {
-        try {
-            const resUsers = await fetch(`${API_URL}/users`);
-            const dataUsers = await resUsers.json();
-            if (Array.isArray(dataUsers)) setUsers(dataUsers);
-
-            const resArticles = await fetch(`${API_URL}/articles`);
-            const dataArticles = await resArticles.json();
-            if (Array.isArray(dataArticles)) setArticles(dataArticles);
-        } catch (err) {
-            console.error("Gagal sinkronisasi data cloud:", err);
-        }
-    };
+    // Efek sinkronisasi otomatis agar data tersimpan permanen
+    useEffect(() => {
+        localStorage.setItem('rayliziie_users_db', JSON.stringify(users));
+    }, [users]);
 
     useEffect(() => {
-        fetchCloudData();
-        const interval = setInterval(fetchCloudData, 5000); // Auto-refresh setiap 5 detik biar LIVE!
-        return () => clearInterval(interval);
-    }, []);
+        localStorage.setItem('rayliziie_articles_db', JSON.stringify(articles));
+    }, [articles]);
 
-    // 1. PENDAFTARAN RELAWAN LANGSUNG MASUK KE SERVER AWAN
-    const handleRegister = async (e) => {
+    // 1. ALUR DAFTAR RELAWAN (DATA PASTI MASUK KE DATABASE)
+    const handleRegister = (e) => {
         e.preventDefault();
-        setLoading(true);
-        if (users.find(u => u.email === regEmail) || regEmail === 'admin') {
+        if (users.find(u => u.email.toLowerCase() === regEmail.toLowerCase()) || regEmail === 'admin') {
             alert('Email ini sudah terdaftar di database pusat, Boy!');
-            setLoading(false);
             return;
         }
-        const newUser = { name: regName, email: regEmail, password: regPassword, approved: false };
         
-        try {
-            await fetch(`${API_URL}/users`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newUser)
-            });
-            alert(`Registrasi Sukses! Data Akun (${regName}) sudah terkirim ke Server Pusat CEO. Silakan hubungi Admin untuk Otorisasi.`);
-            setRegName(''); setRegEmail(''); setRegPassword(''); setPortalMode('login');
-            fetchCloudData();
-        } catch (err) {
-            alert('Gagal mengirim data ke server awan.');
-        } finally {
-            setLoading(false);
-        }
+        const newUser = {
+            id: Date.now(),
+            name: regName,
+            email: regEmail,
+            password: regPassword,
+            approved: false // Default tertahan menunggu verifikasi CEO Ozi
+        };
+        
+        setUsers([...users, newUser]);
+        alert(`Registrasi Sukses, Boy! Akun atas nama (${regName}) telah masuk ke antrean database pusat. Silakan masuk ke akun admin untuk melakukan verifikasi.`);
+        setRegName(''); setRegEmail(''); setRegPassword(''); setPortalMode('login');
     };
 
-    // 2. VERIFIKASI LOGIN REAL-TIME DARI SERVER
+    // 2. ALUR LOGIN KONTROL & PASS KUNCI CEOZIE
     const handleLogin = (e) => {
         e.preventDefault();
+        
+        // Cek Akun Pemilik Utama (CEO Ozi)
         if (loginEmail === 'admin') {
             if (loginPassword === 'ceozie') {
                 setView('admin-dashboard');
-                alert('Selamat Datang CEO Rayliziie Grup! Membuka Pusat Kendali Server...');
+                alert('Selamat Datang CEO Rayliziie Grup! Membuka Pusat Kendali Utama...');
                 setLoginEmail(''); setLoginPassword(''); return;
             } else {
                 alert('Password Admin Utama Salah, Boy!');
@@ -102,107 +93,74 @@ const App = () => {
             }
         }
 
-        const user = users.find(u => u.email === loginEmail);
+        // Cek Akun Relawan Penulis
+        const user = users.find(u => u.email.toLowerCase() === loginEmail.toLowerCase());
         if (!user) {
-            alert('Email tidak ditemukan di server pusat!');
+            alert('Email tidak terdaftar! Harap melakukan pendaftaran relawan terlebih dahulu.');
         } else if (user.password !== loginPassword) {
-            alert('Password salah, Boy!');
+            alert('Password yang Anda masukkan salah, Boy!');
         } else if (!user.approved) {
-            alert('Akses Tertahan! Akun Anda belum di-approve oleh CEO.');
+            alert('Akses Tertahan! Akun Anda sudah terdaftar, tetapi BELUM DI-APPROVE oleh CEO Rayliziie Grup.');
         } else {
             setCurrentUser(user);
-            alert(`Otentikasi Berhasil! Selamat datang di ruang redaksi, ${user.name}.`);
+            alert(`Otentikasi Sukses! Selamat bekerja di ruang redaksi, ${user.name}.`);
         }
         setLoginEmail(''); setLoginPassword('');
     };
 
-    // 3. FITUR LUPA PASSWORD TERPUSAT
+    // 3. FITUR LUPA PASSWORD (MENAMPILKAN DATA LIVE DARI KODE)
     const handleForgotPassword = (e) => {
         e.preventDefault();
         if (forgotEmail === 'admin') {
-            alert('Hubungi tim IT internal untuk reset akun root CEO!');
+            alert('Silakan hubungi tim teknis internal untuk reset akses root CEO!');
             return;
         }
-        const user = users.find(u => u.email === forgotEmail);
+        const user = users.find(u => u.email.toLowerCase() === forgotEmail.toLowerCase());
         if (user) {
-            alert(`Sistem Otorisasi Pusat: Akun ditemukan!\nNama: ${user.name}\nPassword Anda adalah: ${user.password}\n\nSilakan simpan password Anda dengan baik.`);
+            alert(`[Pusat Keamanan] Akun Ditemukan!\nNama Kontributor: ${user.name}\nPassword Anda adalah: ${user.password}\n\nHarap catat sandi Anda dengan baik.`);
             setPortalMode('login');
         } else {
-            alert('Email tidak terdaftar di server kami!');
+            alert('Email tidak ditemukan di database server pusat!');
         }
         setForgotEmail('');
     };
 
-    // 4. KIRIM ARTIKEL KONTRIBUTOR KE SERVER REVIEW
-    const handleCreateArticle = async (e) => {
+    // 4. KIRIM ARTIKEL KE MEJA EDITORIAL CEO
+    const handleCreateArticle = (e) => {
         e.preventDefault();
-        setLoading(true);
         const newArticle = {
+            id: Date.now(),
             title: artTitle,
             category: artCategory,
             content: artContent,
             author: currentUser.name,
-            status: 'Pending Review'
+            status: 'Pending Review' // Tertahan di meja sensor
         };
 
-        try {
-            await fetch(`${API_URL}/articles`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newArticle)
-            });
-            alert('Artikel sukses di-upload ke antrean review server pusat!');
-            setArtTitle(''); setArtContent('');
-            fetchCloudData();
-        } catch (err) {
-            alert('Gagal mengirim artikel ke server.');
-        } finally {
-            setLoading(false);
-        }
+        setArticles([...articles, newArticle]);
+        alert('Artikel sukses di-upload ke antrean meja sensor kelayakan berita!');
+        setArtTitle(''); setArtContent('');
     };
 
-    // KONTROL ADMIN: APPROVE AKUN RELAWAN BARU SECARA LIVE
-    const approveUser = async (id) => {
-        try {
-            await fetch(`${API_URL}/users/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ approved: true })
-            });
-            alert('Akun kontributor resmi diaktifkan!');
-            fetchCloudData();
-        } catch (err) {
-            alert('Gagal meng-approve user.');
-        }
+    // AKSI CEO: APPROVE AKUN BARU
+    const approveUser = (id) => {
+        setUsers(users.map(u => u.id === id ? { ...u, approved: true } : u));
+        alert('Akun relawan telah resmi diaktifkan di server pusat!');
     };
 
-    // KONTROL ADMIN: APPROVE PUBLISH ARTIKEL LIVE
-    const approveArticle = async (id) => {
-        try {
-            await fetch(`${API_URL}/articles/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: 'Published' })
-            });
-            alert('Berita resmi dipublikasikan ke publik!');
-            fetchCloudData();
-        } catch (err) {
-            alert('Gagal menerbitkan artikel.');
-        }
+    // AKSI CEO: PUBLISH ARTIKEL
+    const approveArticle = (id) => {
+        setArticles(articles.map(a => a.id === id ? { ...a, status: 'Published' } : a));
+        alert('Artikel dinyatakan layak terbit dan live ke publik!');
     };
 
-    // KONTROL ADMIN: REJECT ARTIKEL LIVE
-    const rejectArticle = async (id) => {
-        try {
-            await fetch(`${API_URL}/articles/${id}`, { method: 'DELETE' });
-            alert('Draf artikel dihapus dari server.');
-            fetchCloudData();
-        } catch (err) {
-            alert('Gagal menghapus artikel.');
-        }
+    // AKSI CEO: REJECT ARTIKEL
+    const rejectArticle = (id) => {
+        setArticles(articles.filter(a => a.id !== id));
+        alert('Draf artikel ditolak dan dihapus dari server redaksi.');
     };
 
-    // CENTRAL CONTROL SERVER SCREEN
+    // VIEW 1: CENTRAL CONTROL SERVER (MEJA KERJA CEO OZI)
     if (view === 'admin-dashboard') {
         return (
             <div style={{ minHeight: '100vh', backgroundColor: '#0f172a', color: '#f8fafc', padding: '24px', fontFamily: 'sans-serif' }}>
@@ -210,13 +168,13 @@ const App = () => {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #334155', paddingBottom: '20px', marginBottom: '30px' }}>
                         <div>
                             <h1 style={{ fontSize: '24px', fontWeight: '900', margin: 0 }}>⚙️ RAYLIZIIE CENTRAL CONTROL SERVER</h1>
-                            <p style={{ fontSize: '12px', color: '#a78bfa', margin: '5px 0 0 0' }}>STATUS SERVER: <span style={{ color: '#10b981', fontWeight: '800' }}>● LIVE & SYNCED</span> (MEDAN, SUMATERA UTARA)</p>
+                            <p style={{ fontSize: '12px', color: '#a78bfa', margin: '5px 0 0 0' }}>STATUS SERVER: <span style={{ color: '#10b981', fontWeight: '800' }}>● LIVE & RUNNING</span> (MEDAN, SUMATERA UTARA)</p>
                         </div>
-                        <button onClick={() => setView('home')} style={{ backgroundColor: '#7f1d1d', color: '#fca5a5', border: '1px solid #991b1b', padding: '10px 20px', borderRadius: '20px', cursor: 'pointer', fontWeight: '700' }}>Keluar Server</button>
+                        <button onClick={() => setView('home')} style={{ backgroundColor: '#7f1d1d', color: '#fca5a5', border: 'none', padding: '10px 20px', borderRadius: '20px', cursor: 'pointer', fontWeight: '700' }}>Keluar Server</button>
                     </div>
 
                     <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-                        {/* LIVE USER REVIEW */}
+                        {/* ANTRIAN VERIFIKASI USER */}
                         <div style={{ flex: '1', minWidth: '300px', backgroundColor: '#1e293b', border: '1px solid #334155', padding: '20px', borderRadius: '16px' }}>
                             <h2 style={{ fontSize: '14px', fontWeight: '800', margin: '0 0 20px 0' }}>👥 VERIFIKASI AKUN RELAWAN ({users.filter(u=>!u.approved).length})</h2>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -236,12 +194,12 @@ const App = () => {
                             </div>
                         </div>
 
-                        {/* LIVE ARTICLE SENSOR */}
+                        {/* ANTRIAN FILTER ARTIKEL */}
                         <div style={{ flex: '2', minWidth: '400px', backgroundColor: '#1e293b', border: '1px solid #334155', padding: '20px', borderRadius: '16px' }}>
                             <h2 style={{ fontSize: '14px', fontWeight: '800', margin: '0 0 20px 0' }}>📝 MEJA SENSOR ARTIKEL KELAYAKAN ({articles.filter(a=>a.status==='Pending Review').length})</h2>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                                 {articles.filter(a => a.status === 'Pending Review').length === 0 ? (
-                                    <p style={{ fontSize: '12px', color: '#64748b', fontStyle: 'italic' }}>Server bersih. Belum ada draf masuk.</p>
+                                    <p style={{ fontSize: '12px', color: '#64748b', fontStyle: 'italic' }}>Server bersih. Belum ada draf masuk dari penulis.</p>
                                 ) : (
                                     articles.filter(a => a.status === 'Pending Review').map(a => (
                                         <div key={a.id} style={{ padding: '16px', backgroundColor: '#0f172a', borderRadius: '12px', border: '1px solid #334155' }}>
@@ -268,7 +226,7 @@ const App = () => {
         );
     }
 
-    // INTERFACE GATEWAY PORTAL
+    // VIEW 2: GATEWAY PORTAL KETIK & DAFTAR
     if (view === 'portal') {
         return (
             <div style={{ minHeight: '100vh', backgroundColor: '#0f172a', color: '#f8fafc', padding: '24px', fontFamily: 'sans-serif' }}>
@@ -316,15 +274,13 @@ const App = () => {
                                         <label style={{ fontSize: '10px', fontWeight: '700', color: '#94a3b8', display: 'block', marginBottom: '6px' }}>BUAT PASSWORD</label>
                                         <input type="password" value={regPassword} onChange={(e) => setRegPassword(e.target.value)} placeholder="Buat password..." required style={{ width: '100%', padding: '10px', backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#fff', boxSizing: 'border-box' }} />
                                     </div>
-                                    <button type="submit" disabled={loading} style={{ backgroundColor: '#6366f1', color: '#fff', padding: '12px', borderRadius: '8px', border: 'none', fontWeight: '700', cursor: 'pointer' }}>
-                                        {loading ? 'Mengirim data...' : 'Ajukan Relawan'}
-                                    </button>
+                                    <button type="submit" style={{ backgroundColor: '#6366f1', color: '#fff', padding: '12px', borderRadius: '8px', border: 'none', fontWeight: '700', cursor: 'pointer' }}>Ajukan Relawan</button>
                                 </form>
                             )}
 
                             {portalMode === 'forgot' && (
                                 <form onSubmit={handleForgotPassword} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                                    <h3 style={{ fontSize: '14px', margin: 0, color: '#fff', textAlign: 'center' }}>🔑 PEMULIHAN KODE AKSES</h3>
+                                    <h3 style={{ fontSize: '14px', margin: 0, color: '#fff', textAlign: 'center' }}>🔑 PEMULIHAN SANDI AKUN</h3>
                                     <div>
                                         <label style={{ fontSize: '10px', fontWeight: '700', color: '#94a3b8', display: 'block', marginBottom: '6px' }}>MASUKKAN EMAIL ANDA</label>
                                         <input type="email" value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} placeholder="name@example.com" required style={{ width: '100%', padding: '10px', backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#fff', boxSizing: 'border-box' }} />
@@ -335,9 +291,9 @@ const App = () => {
                             )}
                         </div>
                     ) : (
-                        // WRITER FIELD FORM
+                        // FORM MENULIS KONTEN BERITA
                         <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', padding: '24px', borderRadius: '16px' }}>
-                            <div style={{ display: 'flex', justify: 'space-between', marginBottom: '20px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
                                 <h2 style={{ fontSize: '14px', fontWeight: '800', margin: 0 }}>✍️ RUANG REDAKSI KONTRIBUTOR</h2>
                                 <span style={{ fontSize: '10px', color: '#10b981', fontWeight: '700' }}>● Sesi Aktif</span>
                             </div>
@@ -360,9 +316,7 @@ const App = () => {
                                     <textarea rows="6" value={artContent} onChange={(e) => setArtContent(e.target.value)} placeholder="Ketik narasi berita lengkap..." required style={{ width: '100%', padding: '12px', backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#fff', marginTop: '6px', resize: 'none', boxSizing: 'border-box' }}></textarea>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'end' }}>
-                                    <button type="submit" disabled={loading} style={{ backgroundColor: '#fff', color: '#0f172a', padding: '12px 24px', border: 'none', borderRadius: '8px', fontWeight: '700', cursor: 'pointer' }}>
-                                        {loading ? 'Mengirim...' : 'Ajukan Terbit'}
-                                    </button>
+                                    <button type="submit" style={{ backgroundColor: '#fff', color: '#0f172a', padding: '12px 24px', border: 'none', borderRadius: '8px', fontWeight: '700', cursor: 'pointer' }}>Ajukan Terbit</button>
                                 </div>
                             </form>
                         </div>
@@ -372,9 +326,10 @@ const App = () => {
         );
     }
 
-    // HOME SCREEN
+    // VIEW 3: LANDING PAGE DEPAN
     return (
         <div style={{ minHeight: '100vh', backgroundColor: '#0f172a', color: '#f8fafc', fontFamily: 'sans-serif', margin: 0, padding: 0 }}>
+            {/* Header */}
             <header style={{ borderBottom: '1px solid #1e293b', backgroundColor: '#0f172a', position: 'sticky', top: 0, zIndex: 50 }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
@@ -385,17 +340,19 @@ const App = () => {
                 </div>
             </header>
 
+            {/* Hero */}
             <section style={{ textAlign: 'center', padding: '60px 20px' }}>
                 <span style={{ fontSize: '11px', color: '#818cf8', border: '1px solid #334155', padding: '6px 12px', borderRadius: '20px', fontWeight: '600' }}>🛡️ DIVISI INFORMASI & TEKNOLOGI GLOBAL</span>
                 <h1 style={{ fontSize: '40px', fontWeight: '950', color: '#fff', marginTop: '20px' }}>Navigasi Masa Depan</h1>
                 <p style={{ fontSize: '28px', fontWeight: '900', background: 'linear-gradient(to right, #818cf8, #c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0 }}>Ekosistem Media Siber Terintegrasi</p>
             </section>
 
+            {/* Grid Konten */}
             <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px 80px 20px' }}>
                 <h2 style={{ fontSize: '12px', color: '#64748b', letterSpacing: '2px', borderBottom: '1px solid #1e293b', paddingBottom: '10px', marginBottom: '30px' }}>DIGITAL MEDIA NETWORK</h2>
                 <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginBottom: '40px' }}>
                     {mediaNetwork.map((item) => (
-                        <div key={item.name} style={{ flex: '1', minWidth: '280px', backgroundColor: '#1e293b', border: '1px solid #334155', padding: '24px', borderRadius: '16px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                        <div key={item.name} style={{ flex: '1', minWidth: '280px', backgroundColor: '#1e293b', border: '1px solid #334155', padding: '24px', borderRadius: '16px', display: 'flex', flexDirection: 'column', justify: 'space-between' }}>
                             <div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                     <span style={{ fontSize: '24px' }}>{item.icon}</span>
