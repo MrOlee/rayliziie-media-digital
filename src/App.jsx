@@ -45,6 +45,7 @@ const App = () => {
     const [artTitle, setArtTitle] = useState('');
     const [artCategory, setArtCategory] = useState('gizi');
     const [artContent, setArtContent] = useState('');
+    const [artImageUrl, setArtImageUrl] = useState(''); // TAMBAHAN: State Foto
 
     // AMBIL DATA DARI SUPABASE SECARA REAL-TIME (POLLING DATA)
     const fetchSupabaseData = async () => {
@@ -68,7 +69,7 @@ const App = () => {
 
     useEffect(() => {
         fetchSupabaseData();
-        const interval = setInterval(fetchSupabaseData, 3000); // Pollingiap 3 detik
+        const interval = setInterval(fetchSupabaseData, 3000); // Polling tiap 3 detik
         return () => clearInterval(interval);
     }, []);
 
@@ -156,7 +157,14 @@ const App = () => {
             const res = await fetch(`${SUPABASE_URL}/rest/v1/rayliziie_articles`, {
                 method: 'POST',
                 headers,
-                body: JSON.stringify({ title: artTitle, category: artCategory, content: artContent, author: currentUser.name, status: 'Pending Review' })
+                body: JSON.stringify({ 
+                    title: artTitle, 
+                    category: artCategory, 
+                    content: artContent, 
+                    image_url: artImageUrl, // TAMBAHAN: Kirim Link Foto
+                    author: currentUser.name, 
+                    status: 'Pending Review' 
+                })
             });
 
             if (!res.ok) {
@@ -167,7 +175,7 @@ const App = () => {
             }
 
             alert('Artikel terkirim! Status: PENDING REVIEW di Central Server.');
-            setArtTitle(''); setArtContent('');
+            setArtTitle(''); setArtContent(''); setArtImageUrl(''); // Reset Foto
             fetchSupabaseData();
         } catch (err) {
             alert('Gagal mengirim draf artikel ke awan.');
@@ -211,7 +219,7 @@ const App = () => {
                 headers
             });
             alert('Draf artikel dihapus permanen dari server cloud.');
-            fetchCloudData();
+            fetchSupabaseData();
         } catch (err) {
             alert('Gagal menghapus draf.');
         }
@@ -264,7 +272,8 @@ const App = () => {
                                                 <div>
                                                     <span style={{ fontSize: '9px', fontWeight: '700', color: '#818cf8', backgroundColor: '#1e1b4b', padding: '2px 6px', borderRadius: '4px' }}>{a.category.toUpperCase()}</span>
                                                     <h3 style={{ fontSize: '15px', fontWeight: '800', margin: '8px 0 4px 0', color: '#fff' }}>{a.title}</h3>
-                                                    <p style={{ fontSize: '10px', color: '#64748b', margin: 0 }}>Oleh: {a.author}</p>
+                                                    {a.image_url && <img src={a.image_url} width="100" style={{ marginTop: '10px', borderRadius: '4px' }} />}
+                                                    <p style={{ fontSize: '10px', color: '#64748b', margin: '10px 0 0 0' }}>Oleh: {a.author}</p>
                                                 </div>
                                                 <div style={{ display: 'flex', gap: '6px' }}>
                                                     <button onClick={() => approveArticle(a.id)} style={{ backgroundColor: '#10b981', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontWeight: '700', fontSize: '11px' }}>Terbitkan</button>
@@ -336,18 +345,6 @@ const App = () => {
                                     </button>
                                 </form>
                             )}
-
-                            {portalMode === 'forgot' && (
-                                <form onSubmit={handleForgotPassword} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                                    <h3 style={{ fontSize: '14px', margin: 0, color: '#fff', textAlign: 'center' }}>🔑 PEMULIHAN SANDI AKUN</h3>
-                                    <div>
-                                        <label style={{ fontSize: '10px', fontWeight: '700', color: '#94a3b8', display: 'block', marginBottom: '6px' }}>MASUKKAN EMAIL ANDA</label>
-                                        <input type="email" value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} placeholder="name@example.com" required style={{ width: '100%', padding: '10px', backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#fff', boxSizing: 'border-box' }} />
-                                    </div>
-                                    <button type="submit" style={{ backgroundColor: '#6366f1', color: '#fff', padding: '12px', borderRadius: '8px', border: 'none', fontWeight: '700', cursor: 'pointer' }}>Cek Sandi Pusat</button>
-                                    <span onClick={() => setPortalMode('login')} style={{ fontSize: '11px', color: '#94a3b8', textAlign: 'center', cursor: 'pointer', marginTop: '5px' }}>Kembali ke Login</span>
-                                </form>
-                            )}
                         </div>
                     ) : (
                         // RUANG KETIK KONTRIBUTOR TERVERIFIKASI
@@ -360,6 +357,11 @@ const App = () => {
                                 <div>
                                     <label style={{ fontSize: '12px', fontWeight: '700', color: '#94a3b8' }}>JUDUL ARTIKEL</label>
                                     <input type="text" value={artTitle} onChange={(e) => setArtTitle(e.target.value)} placeholder="Judul berita..." required style={{ width: '100%', padding: '12px', backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#fff', marginTop: '6px', boxSizing: 'border-box' }} />
+                                </div>
+                                {/* INPUT URL GAMBAR */}
+                                <div>
+                                    <label style={{ fontSize: '12px', fontWeight: '700', color: '#94a3b8' }}>URL GAMBAR</label>
+                                    <input type="text" value={artImageUrl} onChange={(e) => setArtImageUrl(e.target.value)} placeholder="Link foto..." required style={{ width: '100%', padding: '12px', backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#fff', marginTop: '6px', boxSizing: 'border-box' }} />
                                 </div>
                                 <div>
                                     <label style={{ fontSize: '12px', fontWeight: '700', color: '#94a3b8' }}>TARGET DIVISI MEDIA</label>
@@ -390,7 +392,6 @@ const App = () => {
     // TAMPILAN DEPAN UTAMA PUBLIC WEBSITE
     return (
         <div style={{ minHeight: '100vh', backgroundColor: '#0f172a', color: '#f8fafc', fontFamily: 'sans-serif', margin: 0, padding: 0 }}>
-            {/* Header */}
             <header style={{ borderBottom: '1px solid #1e293b', backgroundColor: '#0f172a', position: 'sticky', top: 0, zIndex: 50 }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
@@ -401,14 +402,12 @@ const App = () => {
                 </div>
             </header>
 
-            {/* Hero */}
             <section style={{ textAlign: 'center', padding: '60px 20px' }}>
                 <span style={{ fontSize: '11px', color: '#818cf8', border: '1px solid #334155', padding: '6px 12px', borderRadius: '20px', fontWeight: '600' }}>🛡️ DIVISI INFORMASI & TEKNOLOGI GLOBAL</span>
                 <h1 style={{ fontSize: '40px', fontWeight: '950', color: '#fff', marginTop: '20px' }}>Navigasi Masa Depan</h1>
                 <p style={{ fontSize: '28px', fontWeight: '900', background: 'linear-gradient(to right, #818cf8, #c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0 }}>Ekosistem Media Siber Terintegrasi</p>
             </section>
 
-            {/* Grid Konten */}
             <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px 80px 20px' }}>
                 <h2 style={{ fontSize: '12px', color: '#64748b', letterSpacing: '2px', borderBottom: '1px solid #1e293b', paddingBottom: '10px', marginBottom: '30px' }}>DIGITAL MEDIA NETWORK</h2>
                 <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginBottom: '40px' }}>
@@ -427,6 +426,7 @@ const App = () => {
                                 <div style={{ marginTop: '15px' }}>
                                     {articles.filter(a => a.category === (item.name === 'NutrisiDietMu' ? 'gizi' : item.name === 'BolaGass' ? 'bola' : item.name === 'GlowLogika' ? 'skincare' : 'keuangan') && a.status === 'Published').map(art => (
                                         <div key={art.id} style={{ padding: '10px', backgroundColor: '#0f172a', borderRadius: '8px', fontSize: '12px', marginTop: '8px' }}>
+                                            {art.image_url && <img src={art.image_url} width="100%" style={{ borderRadius: '4px', marginBottom: '5px' }} />}
                                             <h4 style={{ margin: 0, color: '#f1f5f9', fontWeight: '700' }}>{art.title}</h4>
                                             <p style={{ margin: '4px 0 0 0', fontSize: '10px', color: '#64748b' }}>Oleh: {art.author}</p>
                                         </div>
