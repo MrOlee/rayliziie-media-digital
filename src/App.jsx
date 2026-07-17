@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 
-// GANTI DENGAN KUNCI SUPABASE LU
-const SUPABASE_URL = "https://harpdcqmrqdgckcuhxfr.supabase.co";
+// GANTI DENGAN KUNCI SUPABASE LU DI SINI
+const SUPABASE_URL = "https://harpdcqmrqdgckcuhxfr.supabase.co"; 
 const SUPABASE_ANON_KEY = "sb_publishable_ppzSXi7DuN7v0racT9l98A_JxK5-MGG";
+
 const headers = {
     'apikey': SUPABASE_ANON_KEY,
     'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
