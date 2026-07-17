@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { 
     Laptop, Sparkles, Flame, Box, Landmark, 
     Globe, ShieldCheck, ArrowUpRight, ArrowRight, 
-    Layers, Users, BarChart3, Radio, FileText, PlusCircle, UserPlus
+    Layers, Users, BarChart3, Radio, FileText, 
+    PlusCircle, UserPlus, Image, CheckCircle, ArrowLeft
 } from 'lucide-react';
 
 const mediaNetwork = [
@@ -64,18 +65,125 @@ const stats = [
 ];
 
 const App = () => {
-    const [view, setView] = useState('home'); // 'home' atau 'portal'
+    const [view, setView] = useState('home'); // 'home', 'portal', atau 'daftar-relawan'
+    
+    // State Form Artikel
     const [title, setTitle] = useState('');
     const [category, setCategory] = useState('gizi');
     const [content, setContent] = useState('');
+    const [articleImage, setArticleImage] = useState(null);
+
+    // State Form Pendaftaran Relawan
+    const [volunteerName, setVolunteerName] = useState('');
+    const [volunteerEmail, setVolunteerEmail] = useState('');
+    const [volunteerNiche, setVolunteerNiche] = useState('gizi');
+    const [volunteerReason, setVolunteerReason] = useState('');
+
+    // Handle Upload Gambar Artikel
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setArticleImage(URL.createObjectURL(file));
+        }
+    };
 
     const handlePublish = (e) => {
         e.preventDefault();
-        alert(`Sukses menerbitkan artikel "${title}" ke pilar Rayliziie Media! Konten sedang ditinjau oleh Direksi Utama.`);
+        alert(`Sukses menerbitkan artikel "${title}" ke pilar Rayliziie Media! Konten beserta gambar sedang ditinjau oleh Direksi Utama.`);
         setTitle('');
         setContent('');
+        setArticleImage(null);
     };
 
+    const handleRegisterVolunteer = (e) => {
+        e.preventDefault();
+        alert(`Halo ${volunteerName}, pendaftaran Anda sebagai relawan penulis Rayliziie Media telah diterima! Tim internal kami akan segera menghubungi Anda via email.`);
+        setVolunteerName('');
+        setVolunteerEmail('');
+        setVolunteerReason('');
+        setView('portal');
+    };
+
+    // HALAMAN PORTAL PENDAFTARAN RELAWAN (INTERNAL)
+    if (view === 'daftar-relawan') {
+        return (
+            <div className="min-h-screen bg-slate-950 text-slate-100 font-sans p-6 flex items-center justify-center">
+                <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
+                    <div className="flex items-center gap-2 text-indigo-400 font-800 text-xs uppercase tracking-wider mb-2">
+                        <UserPlus className="h-4 w-4" /> Kemitraan Penulis Kontributor
+                    </div>
+                    <h2 className="text-xl font-900 text-white tracking-tight">Gabung Rayliziie Media</h2>
+                    <p className="text-xs text-slate-400 mt-1 mb-6">Lengkapi data diri Anda untuk mulai menulis dan menghasilkan cuan bersama kami.</p>
+                    
+                    <form onSubmit={handleRegisterVolunteer} className="space-y-4">
+                        <div>
+                            <label className="block text-[10px] font-700 text-slate-400 mb-1.5 uppercase tracking-wide">Nama Lengkap</label>
+                            <input 
+                                type="text" 
+                                value={volunteerName}
+                                onChange={(e) => setVolunteerName(e.target.value)}
+                                placeholder="Masukkan nama lengkap Anda..."
+                                required
+                                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-[10px] font-700 text-slate-400 mb-1.5 uppercase tracking-wide">Alamat Email Aktif</label>
+                            <input 
+                                type="email" 
+                                value={volunteerEmail}
+                                onChange={(e) => setVolunteerEmail(e.target.value)}
+                                placeholder="name@example.com"
+                                required
+                                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-[10px] font-700 text-slate-400 mb-1.5 uppercase tracking-wide">Fokus Niche Keahlian</label>
+                            <select 
+                                value={volunteerNiche}
+                                onChange={(e) => setVolunteerNiche(e.target.value)}
+                                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                            >
+                                <option value="gizi">NutrisiDietMu (Gizi & Kesehatan)</option>
+                                <option value="bola">BolaGass (Jurnalisme Olahraga)</option>
+                                <option value="skincare">GlowLogika (Skincare & Beauty)</option>
+                                <option value="keuangan">CuanPintar (Finansial & Investasi)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-[10px] font-700 text-slate-400 mb-1.5 uppercase tracking-wide">Mengapa Anda Ingin Bergabung?</label>
+                            <textarea 
+                                rows="3"
+                                value={volunteerReason}
+                                onChange={(e) => setVolunteerReason(e.target.value)}
+                                placeholder="Ceritakan singkat pengalaman atau motivasi menulismu..."
+                                required
+                                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors resize-none"
+                            ></textarea>
+                        </div>
+                        <div className="pt-2 flex gap-3">
+                            <button 
+                                type="button"
+                                onClick={() => setView('portal')}
+                                className="w-1/3 bg-slate-800 text-slate-300 font-700 text-xs py-2.5 rounded-xl hover:bg-slate-700 transition-all"
+                            >
+                                Batal
+                            </button>
+                            <button 
+                                type="submit" 
+                                className="w-2/3 bg-indigo-600 text-white font-700 text-xs py-2.5 rounded-xl hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-900/20"
+                            >
+                                Ajukan Pendaftaran
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        );
+    }
+
+    // HALAMAN DASHBOARD CMS UTAMA
     if (view === 'portal') {
         return (
             <div className="min-h-screen bg-slate-950 text-slate-100 font-sans p-6">
@@ -100,7 +208,7 @@ const App = () => {
                         </button>
                     </div>
 
-                    {/* Banner Ajakan Menjadi Relawan Cuan */}
+                    {/* Banner Ajakan Menjadi Relawan (Pindah ke Form Internal) */}
                     <div className="mb-8 p-5 rounded-2xl border border-indigo-500/30 bg-gradient-to-r from-indigo-950/40 via-purple-950/20 to-slate-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                         <div>
                             <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-0.5 text-[10px] font-700 uppercase text-indigo-400">
@@ -109,14 +217,12 @@ const App = () => {
                             <h2 className="text-base font-800 text-white mt-2">Mau Jadi Kontributor & Dapat Penghasilan?</h2>
                             <p className="text-xs text-slate-400 mt-0.5">Salurkan keahlian menulismu di bidang Gizi, Bola, Skincare, atau Finansial dan dapatkan bagi hasil kompetitif.</p>
                         </div>
-                        <a 
-                            href="https://forms.google.com" 
-                            target="_blank" 
-                            rel="noopener noreferrer" 
+                        <button 
+                            onClick={() => setView('daftar-relawan')}
                             className="flex items-center gap-1.5 text-xs font-700 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl shadow-lg shadow-indigo-900/20 whitespace-nowrap transition-all"
                         >
                             <UserPlus className="h-3.5 w-3.5" /> Daftar Relawan Cuan
-                        </a>
+                        </button>
                     </div>
 
                     {/* Form Utama Penulisan Artikel */}
@@ -125,51 +231,79 @@ const App = () => {
                             <PlusCircle className="h-4 w-4 text-indigo-400" /> Tulis Artikel Baru
                         </div>
                         <form onSubmit={handlePublish} className="space-y-5">
-                            <div>
-                                <label className="block text-xs font-700 text-slate-400 mb-2 uppercase tracking-wide">Judul Berita / Artikel</label>
-                                <input 
-                                    type="text" 
-                                    value={title}
-                                    onChange={(e) => setTitle(e.target.value)}
-                                    placeholder="Masukkan judul artikel yang memikat..."
-                                    required
-                                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-700 text-slate-400 mb-2 uppercase tracking-wide">Target Publikasi Media</label>
-                                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                                    {[
-                                        { id: 'gizi', label: 'NutrisiDietMu' },
-                                        { id: 'bola', label: 'BolaGass' },
-                                        { id: 'skincare', label: 'GlowLogika' },
-                                        { id: 'keuangan', label: 'CuanPintar' },
-                                    ].map((cat) => (
-                                        <label 
-                                            key={cat.id} 
-                                            className={`flex items-center justify-center p-3 rounded-xl border text-xs font-700 cursor-pointer select-none transition-all ${
-                                                category === cat.id 
-                                                    ? 'bg-indigo-600/10 border-indigo-500 text-white' 
-                                                    : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
-                                            }`}
-                                        >
-                                            <input 
-                                                type="radio" 
-                                                name="category" 
-                                                value={cat.id} 
-                                                checked={category === cat.id}
-                                                onChange={() => setCategory(cat.id)}
-                                                className="sr-only" 
-                                            />
-                                            {cat.label}
-                                        </label>
-                                    ))}
+                            <div className="grid gap-5 md:grid-cols-3">
+                                <div className="md:col-span-2 space-y-5">
+                                    <div>
+                                        <label className="block text-xs font-700 text-slate-400 mb-2 uppercase tracking-wide">Judul Berita / Artikel</label>
+                                        <input 
+                                            type="text" 
+                                            value={title}
+                                            onChange={(e) => setTitle(e.target.value)}
+                                            placeholder="Masukkan judul artikel yang memikat..."
+                                            required
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-700 text-slate-400 mb-2 uppercase tracking-wide">Target Publikasi Media</label>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {[
+                                                { id: 'gizi', label: 'NutrisiDietMu' },
+                                                { id: 'bola', label: 'BolaGass' },
+                                                { id: 'skincare', label: 'GlowLogika' },
+                                                { id: 'keuangan', label: 'CuanPintar' },
+                                            ].map((cat) => (
+                                                <label 
+                                                    key={cat.id} 
+                                                    className={`flex items-center justify-center p-2.5 rounded-xl border text-xs font-700 cursor-pointer select-none transition-all ${
+                                                        category === cat.id 
+                                                            ? 'bg-indigo-600/10 border-indigo-500 text-white' 
+                                                            : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
+                                                    }`}
+                                                >
+                                                    <input 
+                                                        type="radio" 
+                                                        name="category" 
+                                                        value={cat.id} 
+                                                        checked={category === cat.id}
+                                                        onChange={() => setCategory(cat.id)}
+                                                        className="sr-only" 
+                                                    />
+                                                    {cat.label}
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* BAGIAN UPLOAD GAMBAR ARTIKEL */}
+                                <div className="flex flex-col">
+                                    <label className="block text-xs font-700 text-slate-400 mb-2 uppercase tracking-wide">Cover / Gambar Artikel</label>
+                                    <div className="flex-1 min-h-[140px] bg-slate-950 border-2 border-dashed border-slate-800 rounded-xl flex flex-col items-center justify-center p-4 relative group hover:border-indigo-500/50 transition-colors">
+                                        {articleImage ? (
+                                            <>
+                                                <img src={articleImage} alt="Preview" className="w-full h-full object-cover rounded-lg" />
+                                                <label className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs font-700 text-white rounded-xl cursor-pointer transition-opacity">
+                                                    Ganti Gambar
+                                                    <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                                                </label>
+                                            </>
+                                        ) : (
+                                            <label className="flex flex-col items-center justify-center cursor-pointer w-full h-full">
+                                                <Image className="h-6 w-6 text-slate-500 mb-2 group-hover:text-indigo-400 transition-colors" />
+                                                <span className="text-[11px] font-600 text-slate-400 text-center">Pilih File Gambar</span>
+                                                <span className="text-[9px] text-slate-600 mt-0.5">JPG, PNG up to 5MB</span>
+                                                <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                                            </label>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
+
                             <div>
                                 <label className="block text-xs font-700 text-slate-400 mb-2 uppercase tracking-wide">Isi Konten Berita</label>
                                 <textarea 
-                                    rows="8"
+                                    rows="7"
                                     value={content}
                                     onChange={(e) => setContent(e.target.value)}
                                     placeholder="Ketik draf berita lengkap lu di sini, Boy..."
@@ -193,10 +327,9 @@ const App = () => {
         );
     }
 
+    // LANDING PAGE HOME UTAMA
     return (
         <div className="min-h-screen bg-slate-900 text-slate-100 font-sans selection:bg-indigo-600 selection:text-white antialiased">
-            
-            {/* Header Utama */}
             <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-900/90 backdrop-blur-md">
                 <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
                     <div className="flex items-center gap-3">
@@ -208,7 +341,6 @@ const App = () => {
                             <span className="text-[9px] font-700 tracking-widest text-indigo-400 uppercase block -mt-0.5">Rayliziie Grup Subsidiary</span>
                         </div>
                     </div>
-                    {/* Mengubah Tampilan Menjadi Portal Internal Tanpa Eror Link External */}
                     <button 
                         onClick={() => setView('portal')}
                         className="rounded-full bg-white px-5 py-2 text-xs font-700 text-slate-900 transition-all hover:bg-indigo-500 hover:text-white shadow-sm"
@@ -234,7 +366,7 @@ const App = () => {
                 </div>
             </section>
 
-            {/* Ringkasan Statistik */}
+            {/* Statistik */}
             <section className="mx-auto max-w-6xl px-6 mb-20">
                 <div className="grid gap-6 sm:grid-cols-3 border border-slate-800 bg-slate-900 rounded-2xl p-6 shadow-xl">
                     {stats.map((s) => (
@@ -251,10 +383,8 @@ const App = () => {
                 </div>
             </section>
 
-            {/* Grid Lini Bisnis */}
+            {/* Grid Konten */}
             <main className="mx-auto max-w-7xl px-6 pb-28 space-y-20">
-                
-                {/* PILAR A: MEDIA NETWORK */}
                 <div>
                     <div className="relative mb-8 flex items-center gap-4">
                         <h2 className="font-display text-xs font-800 tracking-widest text-slate-400 uppercase">Digital Media Network</h2>
@@ -288,7 +418,6 @@ const App = () => {
                     </div>
                 </div>
 
-                {/* PILAR B: BUSINESS SERVICES */}
                 <div>
                     <div className="relative mb-8 flex items-center gap-4">
                         <h2 className="font-display text-xs font-800 tracking-widest text-slate-400 uppercase">Digital Business Services</h2>
@@ -319,17 +448,14 @@ const App = () => {
                         ))}
                     </div>
                 </div>
-
             </main>
 
-            {/* Footer */}
             <footer className="border-t border-slate-800 bg-slate-950/60">
                 <div className="mx-auto max-w-7xl px-6 py-12 text-center text-xs text-slate-500">
                     <p>&copy; 2026 Rayliziie Media Digital. Seluruh Hak Cipta Dilindungi.</p>
                     <p className="mt-1 font-600 text-indigo-400 tracking-wide">Menaungi NutrisiDietMu, BolaGass, GlowLogika & CuanPintar &middot; Medan, Sumatera Utara [Subsidiary of Rayliziie Grup].</p>
                 </div>
             </footer>
-
         </div>
     );
 };
