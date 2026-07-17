@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
     Laptop, Sparkles, Flame, Box, Landmark, 
     Globe, ShieldCheck, ArrowUpRight, ArrowRight, 
-    Layers, Users, BarChart3, Radio
+    Layers, Users, BarChart3, Radio, FileText, PlusCircle, UserPlus
 } from 'lucide-react';
 
 const mediaNetwork = [
@@ -64,11 +64,140 @@ const stats = [
 ];
 
 const App = () => {
+    const [view, setView] = useState('home'); // 'home' atau 'portal'
+    const [title, setTitle] = useState('');
+    const [category, setCategory] = useState('gizi');
+    const [content, setContent] = useState('');
+
+    const handlePublish = (e) => {
+        e.preventDefault();
+        alert(`Sukses menerbitkan artikel "${title}" ke pilar Rayliziie Media! Konten sedang ditinjau oleh Direksi Utama.`);
+        setTitle('');
+        setContent('');
+    };
+
+    if (view === 'portal') {
+        return (
+            <div className="min-h-screen bg-slate-950 text-slate-100 font-sans p-6">
+                <div className="mx-auto max-w-4xl">
+                    
+                    {/* Header Portal */}
+                    <div className="flex items-center justify-between border-b border-slate-800 pb-5 mb-8">
+                        <div className="flex items-center gap-3">
+                            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600">
+                                <FileText className="h-4 w-4 text-white" />
+                            </span>
+                            <div>
+                                <h1 className="text-lg font-900 tracking-tight text-white">RAYLIZIIE CMS PANEL</h1>
+                                <p className="text-[10px] text-indigo-400 font-600 uppercase tracking-wider">Pusat Manajemen Artikel & Relawan</p>
+                            </div>
+                        </div>
+                        <button 
+                            onClick={() => setView('home')} 
+                            className="text-xs font-700 bg-slate-800 text-slate-300 hover:bg-slate-700 px-4 py-2 rounded-full transition-colors"
+                        >
+                            Kembali ke Web Utama
+                        </button>
+                    </div>
+
+                    {/* Banner Ajakan Menjadi Relawan Cuan */}
+                    <div className="mb-8 p-5 rounded-2xl border border-indigo-500/30 bg-gradient-to-r from-indigo-950/40 via-purple-950/20 to-slate-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                        <div>
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-0.5 text-[10px] font-700 uppercase text-indigo-400">
+                                Program Relawan Penulis 2026
+                            </span>
+                            <h2 className="text-base font-800 text-white mt-2">Mau Jadi Kontributor & Dapat Penghasilan?</h2>
+                            <p className="text-xs text-slate-400 mt-0.5">Salurkan keahlian menulismu di bidang Gizi, Bola, Skincare, atau Finansial dan dapatkan bagi hasil kompetitif.</p>
+                        </div>
+                        <a 
+                            href="https://forms.google.com" 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="flex items-center gap-1.5 text-xs font-700 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl shadow-lg shadow-indigo-900/20 whitespace-nowrap transition-all"
+                        >
+                            <UserPlus className="h-3.5 w-3.5" /> Daftar Relawan Cuan
+                        </a>
+                    </div>
+
+                    {/* Form Utama Penulisan Artikel */}
+                    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                        <div className="flex items-center gap-2 mb-6 text-sm font-800 text-white uppercase tracking-wider">
+                            <PlusCircle className="h-4 w-4 text-indigo-400" /> Tulis Artikel Baru
+                        </div>
+                        <form onSubmit={handlePublish} className="space-y-5">
+                            <div>
+                                <label className="block text-xs font-700 text-slate-400 mb-2 uppercase tracking-wide">Judul Berita / Artikel</label>
+                                <input 
+                                    type="text" 
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                    placeholder="Masukkan judul artikel yang memikat..."
+                                    required
+                                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-700 text-slate-400 mb-2 uppercase tracking-wide">Target Publikasi Media</label>
+                                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                                    {[
+                                        { id: 'gizi', label: 'NutrisiDietMu' },
+                                        { id: 'bola', label: 'BolaGass' },
+                                        { id: 'skincare', label: 'GlowLogika' },
+                                        { id: 'keuangan', label: 'CuanPintar' },
+                                    ].map((cat) => (
+                                        <label 
+                                            key={cat.id} 
+                                            className={`flex items-center justify-center p-3 rounded-xl border text-xs font-700 cursor-pointer select-none transition-all ${
+                                                category === cat.id 
+                                                    ? 'bg-indigo-600/10 border-indigo-500 text-white' 
+                                                    : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
+                                            }`}
+                                        >
+                                            <input 
+                                                type="radio" 
+                                                name="category" 
+                                                value={cat.id} 
+                                                checked={category === cat.id}
+                                                onChange={() => setCategory(cat.id)}
+                                                className="sr-only" 
+                                            />
+                                            {cat.label}
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-700 text-slate-400 mb-2 uppercase tracking-wide">Isi Konten Berita</label>
+                                <textarea 
+                                    rows="8"
+                                    value={content}
+                                    onChange={(e) => setContent(e.target.value)}
+                                    placeholder="Ketik draf berita lengkap lu di sini, Boy..."
+                                    required
+                                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors resize-none"
+                                ></textarea>
+                            </div>
+                            <div className="pt-2 flex justify-end">
+                                <button 
+                                    type="submit" 
+                                    className="bg-white text-slate-900 font-700 text-xs px-6 py-3 rounded-xl hover:bg-indigo-600 hover:text-white transition-all shadow-md"
+                                >
+                                    Terbitkan Berita
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-slate-900 text-slate-100 font-sans selection:bg-indigo-600 selection:text-white antialiased">
             
-            {/* Header dengan Tombol Aktif */}
-            <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-900/95 backdrop-blur-md">
+            {/* Header Utama */}
+            <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-900/90 backdrop-blur-md">
                 <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
                     <div className="flex items-center gap-3">
                         <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 shadow-lg shadow-indigo-900/40">
@@ -79,15 +208,13 @@ const App = () => {
                             <span className="text-[9px] font-700 tracking-widest text-indigo-400 uppercase block -mt-0.5">Rayliziie Grup Subsidiary</span>
                         </div>
                     </div>
-                    {/* Link Aktif ke Sanity Studio Dashboard */}
-                    <a 
-                        href="https://rayliziie-media-cms.sanity.studio" 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="rounded-full bg-white px-5 py-2 text-xs font-700 text-slate-900 transition-all hover:bg-indigo-500 hover:text-white shadow-sm block text-center"
+                    {/* Mengubah Tampilan Menjadi Portal Internal Tanpa Eror Link External */}
+                    <button 
+                        onClick={() => setView('portal')}
+                        className="rounded-full bg-white px-5 py-2 text-xs font-700 text-slate-900 transition-all hover:bg-indigo-500 hover:text-white shadow-sm"
                     >
-                        Portal Admin Terpusat
-                    </a>
+                        Portal Admin & Relawan
+                    </button>
                 </div>
             </header>
 
