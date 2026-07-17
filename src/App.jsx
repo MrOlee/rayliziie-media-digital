@@ -1,11 +1,15 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { 
-    Laptop, Sparkles, Flame, Box, Landmark, 
-    Globe, ShieldCheck, ArrowUpRight, ArrowRight, 
-    Layers, Users, BarChart3, Radio
-} from 'lucide-react';
 
+const App = () => {
+    return (
+        <div style={{ padding: '50px', textAlign: 'center', fontFamily: 'sans-serif' }}>
+            <h1>Rayliziie Media Digital</h1>
+            <p>Sistem sedang dalam sinkronisasi. Harap tunggu deployment berikutnya.</p>
+        </div>
+    );
+};
+
+export default App;
 const mediaNetwork = [
     { 
         name: "NutrisiDietMu", 
