@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from 'react';
 
-// Database awal bawaan sistem default
-const initialUsers = [
-    { id: 1, email: 'penulis@rayliziie.com', name: 'Penulis Kontributor', password: '123', approved: true },
-];
+// ==========================================
+// PENTING: ISI DATA SUPABASE LU DI SINI, BOY!
+// ==========================================
+const SUPABASE_URL = "https://harpdcqmrqdgckcuhxfr.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_ppzSXi7DuN7v0racT9l98A_JxK5-MGG";
+
+const headers = {
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+    'Content-Type': 'application/json'
+};
 
 const mediaNetwork = [
     { name: "NutrisiDietMu", icon: "🌱", cat: "Media Kesehatan & Gizi", desc: "Portal edukasi gizi klinis dan panduan kesehatan masyarakat.", link: "https://nutrisidietmu.vercel.app" },
@@ -18,149 +25,180 @@ const businessServices = [
 ];
 
 const App = () => {
-    const [view, setView] = useState('home'); // 'home', 'portal', 'admin-dashboard'
-    const [portalMode, setPortalMode] = useState('login'); // 'login', 'register', 'forgot'
+    const [view, setView] = useState('home');
+    const [portalMode, setPortalMode] = useState('login');
     
-    // Database State Terpadu (Mengambil langsung dari storage browser lokal secara instan)
-    const [users, setUsers] = useState(() => {
-        const savedUsers = localStorage.getItem('rayliziie_users_db');
-        return savedUsers ? JSON.parse(savedUsers) : initialUsers;
-    });
-    const [articles, setArticles] = useState(() => {
-        const savedArticles = localStorage.getItem('rayliziie_articles_db');
-        return savedArticles ? JSON.parse(savedArticles) : [];
-    });
-    
-    // Session Login State
+    // Cloud DB States
+    const [users, setUsers] = useState([]);
+    const [articles, setArticles] = useState([]);
+    const [loading, setLoading] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
 
-    // Form Binding State
+    // Form States
     const [loginEmail, setLoginEmail] = useState('');
     const [loginPassword, setLoginPassword] = useState('');
     const [regName, setRegName] = useState('');
     const [regEmail, setRegEmail] = useState('');
     const [regPassword, setRegPassword] = useState('');
     const [forgotEmail, setForgotEmail] = useState('');
-    
-    // Article Form State
     const [artTitle, setArtTitle] = useState('');
     const [artCategory, setArtCategory] = useState('gizi');
     const [artContent, setArtContent] = useState('');
 
-    // Efek sinkronisasi otomatis agar data tersimpan permanen
-    useEffect(() => {
-        localStorage.setItem('rayliziie_users_db', JSON.stringify(users));
-    }, [users]);
+    // AMBIL DATA DARI SUPABASE SECARA REAL-TIME (POLLING DATA)
+    const fetchSupabaseData = async () => {
+        if (!SUPABASE_URL.includes("supabase.co")) return;
+        try {
+            const resUsers = await fetch(`${SUPABASE_URL}/rest/v1/rayliziie_users?select=*`, { headers });
+            const dataUsers = await resUsers.json();
+            if (Array.isArray(dataUsers)) setUsers(dataUsers);
 
-    useEffect(() => {
-        localStorage.setItem('rayliziie_articles_db', JSON.stringify(articles));
-    }, [articles]);
-
-    // 1. ALUR DAFTAR RELAWAN (DATA PASTI MASUK KE DATABASE)
-    const handleRegister = (e) => {
-        e.preventDefault();
-        if (users.find(u => u.email.toLowerCase() === regEmail.toLowerCase()) || regEmail === 'admin') {
-            alert('Email ini sudah terdaftar di database pusat, Boy!');
-            return;
+            const resArticles = await fetch(`${SUPABASE_URL}/rest/v1/rayliziie_articles?select=*`, { headers });
+            const dataArticles = await resArticles.json();
+            if (Array.isArray(dataArticles)) setArticles(dataArticles);
+        } catch (err) {
+            console.error("Koneksi Supabase terputus:", err);
         }
-        
-        const newUser = {
-            id: Date.now(),
-            name: regName,
-            email: regEmail,
-            password: regPassword,
-            approved: false // Default tertahan menunggu verifikasi CEO Ozi
-        };
-        
-        setUsers([...users, newUser]);
-        alert(`Registrasi Sukses, Boy! Akun atas nama (${regName}) telah masuk ke antrean database pusat. Silakan masuk ke akun admin untuk melakukan verifikasi.`);
-        setRegName(''); setRegEmail(''); setRegPassword(''); setPortalMode('login');
     };
 
-    // 2. ALUR LOGIN KONTROL & PASS KUNCI CEOZIE
+    useEffect(() => {
+        fetchSupabaseData();
+        const interval = setInterval(fetchSupabaseData, 3000); // Polling real-time tiap 3 detik
+        return () => clearInterval(interval);
+    }, []);
+
+    // 1. REGISTRASI RELAWAN KE SUPABASE
+    const handleRegister = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        if (users.find(u => u.email.toLowerCase() === regEmail.toLowerCase()) || regEmail === 'admin') {
+            alert('Email sudah terdaftar di server Supabase!');
+            setLoading(false);
+            return;
+        }
+
+        try {
+            await fetch(`${SUPABASE_URL}/rest/v1/rayliziie_users`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({ name: regName, email: regEmail, password: regPassword, approved: false })
+            });
+            alert(`Registrasi Berhasil! Data Akun (${regName}) sudah tersimpan di database awan Supabase. Menunggu approval CEO.`);
+            setRegName(''); setRegEmail(''); setRegPassword(''); setPortalMode('login');
+            fetchSupabaseData();
+        } catch (err) {
+            alert('Gagal menyambung ke server Supabase.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // 2. LOGIN CHECK DARI DATA LIVE SUPABASE
     const handleLogin = (e) => {
         e.preventDefault();
-        
-        // Cek Akun Pemilik Utama (CEO Ozi)
         if (loginEmail === 'admin') {
             if (loginPassword === 'ceozie') {
                 setView('admin-dashboard');
-                alert('Selamat Datang CEO Rayliziie Grup! Membuka Pusat Kendali Utama...');
+                alert('Akses Root Diterima! Selamat Datang CEO Rayliziie Grup.');
                 setLoginEmail(''); setLoginPassword(''); return;
             } else {
-                alert('Password Admin Utama Salah, Boy!');
+                alert('Sandi Admin Root Salah!');
                 setLoginPassword(''); return;
             }
         }
 
-        // Cek Akun Relawan Penulis
         const user = users.find(u => u.email.toLowerCase() === loginEmail.toLowerCase());
         if (!user) {
-            alert('Email tidak terdaftar! Harap melakukan pendaftaran relawan terlebih dahulu.');
+            alert('Email tidak ditemukan di database Supabase!');
         } else if (user.password !== loginPassword) {
-            alert('Password yang Anda masukkan salah, Boy!');
+            alert('Password salah!');
         } else if (!user.approved) {
-            alert('Akses Tertahan! Akun Anda sudah terdaftar, tetapi BELUM DI-APPROVE oleh CEO Rayliziie Grup.');
+            alert('Akses Ditolak! Akun Anda aktif di database, tapi BELUM DI-APPROVE oleh CEO.');
         } else {
             setCurrentUser(user);
-            alert(`Otentikasi Sukses! Selamat bekerja di ruang redaksi, ${user.name}.`);
+            alert(`Selamat bekerja di redaksi, ${user.name}!`);
         }
         setLoginEmail(''); setLoginPassword('');
     };
 
-    // 3. FITUR LUPA PASSWORD (MENAMPILKAN DATA LIVE DARI KODE)
+    // 3. FITUR LUPA PASSWORD REAL-TIME
     const handleForgotPassword = (e) => {
         e.preventDefault();
-        if (forgotEmail === 'admin') {
-            alert('Silakan hubungi tim teknis internal untuk reset akses root CEO!');
-            return;
-        }
         const user = users.find(u => u.email.toLowerCase() === forgotEmail.toLowerCase());
         if (user) {
-            alert(`[Pusat Keamanan] Akun Ditemukan!\nNama Kontributor: ${user.name}\nPassword Anda adalah: ${user.password}\n\nHarap catat sandi Anda dengan baik.`);
+            alert(`[Supabase Auth] Akun Valid!\nNama: ${user.name}\nPassword Akun Anda: ${user.password}`);
             setPortalMode('login');
         } else {
-            alert('Email tidak ditemukan di database server pusat!');
+            alert('Email tidak terdaftar di database cloud!');
         }
         setForgotEmail('');
     };
 
-    // 4. KIRIM ARTIKEL KE MEJA EDITORIAL CEO
-    const handleCreateArticle = (e) => {
+    // 4. KIRIM ARTIKEL KONTRIBUTOR KE SUPABASE (PENDING)
+    const handleCreateArticle = async (e) => {
         e.preventDefault();
-        const newArticle = {
-            id: Date.now(),
-            title: artTitle,
-            category: artCategory,
-            content: artContent,
-            author: currentUser.name,
-            status: 'Pending Review' // Tertahan di meja sensor
-        };
-
-        setArticles([...articles, newArticle]);
-        alert('Artikel sukses di-upload ke antrean meja sensor kelayakan berita!');
-        setArtTitle(''); setArtContent('');
+        setLoading(true);
+        try {
+            await fetch(`${SUPABASE_URL}/rest/v1/rayliziie_articles`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({ title: artTitle, category: artCategory, content: artContent, author: currentUser.name, status: 'Pending Review' })
+            });
+            alert('Artikel terkirim! Status: PENDING REVIEW di Central Server.');
+            setArtTitle(''); setArtContent('');
+            fetchSupabaseData();
+        } catch (err) {
+            alert('Gagal mengirim draf artikel.');
+        } finally {
+            setLoading(false);
+        }
     };
 
-    // AKSI CEO: APPROVE AKUN BARU
-    const approveUser = (id) => {
-        setUsers(users.map(u => u.id === id ? { ...u, approved: true } : u));
-        alert('Akun relawan telah resmi diaktifkan di server pusat!');
+    // KONTROL CEO: APPROVE AKUN RELAWAN DI SUPABASE
+    const approveUser = async (id) => {
+        try {
+            await fetch(`${SUPABASE_URL}/rest/v1/rayliziie_users?id=eq.${id}`, {
+                method: 'PATCH',
+                headers,
+                body: JSON.stringify({ approved: true })
+            });
+            alert('Akun kontributor resmi diaktifkan live!');
+            fetchSupabaseData();
+        } catch (err) {
+            alert('Gagal update database.');
+        }
     };
 
-    // AKSI CEO: PUBLISH ARTIKEL
-    const approveArticle = (id) => {
-        setArticles(articles.map(a => a.id === id ? { ...a, status: 'Published' } : a));
-        alert('Artikel dinyatakan layak terbit dan live ke publik!');
+    // KONTROL CEO: PUBLISH ARTIKEL LIVE KE WEBSITE DEPAN
+    const approveArticle = async (id) => {
+        try {
+            await fetch(`${SUPABASE_URL}/rest/v1/rayliziie_articles?id=eq.${id}`, {
+                method: 'PATCH',
+                headers,
+                body: JSON.stringify({ status: 'Published' })
+            });
+            alert('Artikel live ke publik!');
+            fetchSupabaseData();
+        } catch (err) {
+            alert('Gagal meloloskan artikel.');
+        }
     };
 
-    // AKSI CEO: REJECT ARTIKEL
-    const rejectArticle = (id) => {
-        setArticles(articles.filter(a => a.id !== id));
-        alert('Draf artikel ditolak dan dihapus dari server redaksi.');
+    // KONTROL CEO: REJECT ARTIKEL FROM SUPABASE
+    const rejectArticle = async (id) => {
+        try {
+            await fetch(`${SUPABASE_URL}/rest/v1/rayliziie_articles?id=eq.${id}`, {
+                method: 'DELETE',
+                headers
+            });
+            alert('Draf artikel dihapus permanen dari server cloud.');
+            fetchSupabaseData();
+        } catch (err) {
+            alert('Gagal menghapus draf.');
+        }
     };
 
-    // VIEW 1: CENTRAL CONTROL SERVER (MEJA KERJA CEO OZI)
+    // DASHBOARD KENDALI ADMIN (CEO INTERFACE)
     if (view === 'admin-dashboard') {
         return (
             <div style={{ minHeight: '100vh', backgroundColor: '#0f172a', color: '#f8fafc', padding: '24px', fontFamily: 'sans-serif' }}>
@@ -168,18 +206,18 @@ const App = () => {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #334155', paddingBottom: '20px', marginBottom: '30px' }}>
                         <div>
                             <h1 style={{ fontSize: '24px', fontWeight: '900', margin: 0 }}>⚙️ RAYLIZIIE CENTRAL CONTROL SERVER</h1>
-                            <p style={{ fontSize: '12px', color: '#a78bfa', margin: '5px 0 0 0' }}>STATUS SERVER: <span style={{ color: '#10b981', fontWeight: '800' }}>● LIVE & RUNNING</span> (MEDAN, SUMATERA UTARA)</p>
+                            <p style={{ fontSize: '12px', color: '#a78bfa', margin: '5px 0 0 0' }}>DATABASE: <span style={{ color: '#10b981', fontWeight: '800' }}>● SUPABASE CLOUD LIVE</span></p>
                         </div>
                         <button onClick={() => setView('home')} style={{ backgroundColor: '#7f1d1d', color: '#fca5a5', border: 'none', padding: '10px 20px', borderRadius: '20px', cursor: 'pointer', fontWeight: '700' }}>Keluar Server</button>
                     </div>
 
                     <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-                        {/* ANTRIAN VERIFIKASI USER */}
+                        {/* APPROVAL RELAWAN */}
                         <div style={{ flex: '1', minWidth: '300px', backgroundColor: '#1e293b', border: '1px solid #334155', padding: '20px', borderRadius: '16px' }}>
-                            <h2 style={{ fontSize: '14px', fontWeight: '800', margin: '0 0 20px 0' }}>👥 VERIFIKASI AKUN RELAWAN ({users.filter(u=>!u.approved).length})</h2>
+                            <h2 style={{ fontSize: '14px', fontWeight: '800', margin: '0 0 20px 0' }}>👥 VERIFIKASI AKUN ({users.filter(u=>!u.approved).length})</h2>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                 {users.filter(u => !u.approved).length === 0 ? (
-                                    <p style={{ fontSize: '12px', color: '#64748b', fontStyle: 'italic' }}>Tidak ada antrean pendaftar baru.</p>
+                                    <p style={{ fontSize: '12px', color: '#64748b', fontStyle: 'italic' }}>Tidak ada antrean pendaftar.</p>
                                 ) : (
                                     users.filter(u => !u.approved).map(u => (
                                         <div key={u.id} style={{ padding: '12px', backgroundColor: '#0f172a', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -187,19 +225,19 @@ const App = () => {
                                                 <p style={{ fontSize: '12px', fontWeight: '700', margin: 0 }}>{u.name}</p>
                                                 <p style={{ fontSize: '10px', color: '#64748b', margin: 0 }}>{u.email}</p>
                                             </div>
-                                            <button onClick={() => approveUser(u.id)} style={{ backgroundColor: '#10b981', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontWeight: '700', fontSize: '11px' }}>Approve</button>
+                                            <button onClick={() => approveUser(u.id)} style={{ backgroundColor: '#10b981', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontWeight: '700' }}>Approve</button>
                                         </div>
                                     ))
                                 )}
                             </div>
                         </div>
 
-                        {/* ANTRIAN FILTER ARTIKEL */}
+                        {/* SENSOR KELAYAKAN ARTIKEL */}
                         <div style={{ flex: '2', minWidth: '400px', backgroundColor: '#1e293b', border: '1px solid #334155', padding: '20px', borderRadius: '16px' }}>
-                            <h2 style={{ fontSize: '14px', fontWeight: '800', margin: '0 0 20px 0' }}>📝 MEJA SENSOR ARTIKEL KELAYAKAN ({articles.filter(a=>a.status==='Pending Review').length})</h2>
+                            <h2 style={{ fontSize: '14px', fontWeight: '800', margin: '0 0 20px 0' }}>📝 MEJA SENSOR KELAYAKAN ARTIKEL ({articles.filter(a=>a.status==='Pending Review').length})</h2>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                                 {articles.filter(a => a.status === 'Pending Review').length === 0 ? (
-                                    <p style={{ fontSize: '12px', color: '#64748b', fontStyle: 'italic' }}>Server bersih. Belum ada draf masuk dari penulis.</p>
+                                    <p style={{ fontSize: '12px', color: '#64748b', fontStyle: 'italic' }}>Server bersih. Belum ada artikel masuk.</p>
                                 ) : (
                                     articles.filter(a => a.status === 'Pending Review').map(a => (
                                         <div key={a.id} style={{ padding: '16px', backgroundColor: '#0f172a', borderRadius: '12px', border: '1px solid #334155' }}>
@@ -207,7 +245,7 @@ const App = () => {
                                                 <div>
                                                     <span style={{ fontSize: '9px', fontWeight: '700', color: '#818cf8', backgroundColor: '#1e1b4b', padding: '2px 6px', borderRadius: '4px' }}>{a.category.toUpperCase()}</span>
                                                     <h3 style={{ fontSize: '15px', fontWeight: '800', margin: '8px 0 4px 0', color: '#fff' }}>{a.title}</h3>
-                                                    <p style={{ fontSize: '10px', color: '#64748b', margin: 0 }}>Kontributor: {a.author}</p>
+                                                    <p style={{ fontSize: '10px', color: '#64748b', margin: 0 }}>Oleh: {a.author}</p>
                                                 </div>
                                                 <div style={{ display: 'flex', gap: '6px' }}>
                                                     <button onClick={() => approveArticle(a.id)} style={{ backgroundColor: '#10b981', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontWeight: '700', fontSize: '11px' }}>Terbitkan</button>
@@ -226,7 +264,7 @@ const App = () => {
         );
     }
 
-    // VIEW 2: GATEWAY PORTAL KETIK & DAFTAR
+    // INTERFACE REDAKSI / PORTAL LOG IN
     if (view === 'portal') {
         return (
             <div style={{ minHeight: '100vh', backgroundColor: '#0f172a', color: '#f8fafc', padding: '24px', fontFamily: 'sans-serif' }}>
@@ -249,7 +287,7 @@ const App = () => {
                                 <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                                     <div>
                                         <label style={{ fontSize: '10px', fontWeight: '700', color: '#94a3b8', display: 'block', marginBottom: '6px' }}>EMAIL TERVERIFIKASI</label>
-                                        <input type="text" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} placeholder="Ketik email atau 'admin'..." required style={{ width: '100%', padding: '10px', backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#fff', boxSizing: 'border-box' }} />
+                                        <input type="text" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} placeholder="Email atau 'admin'..." required style={{ width: '100%', padding: '10px', backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#fff', boxSizing: 'border-box' }} />
                                     </div>
                                     <div>
                                         <label style={{ fontSize: '10px', fontWeight: '700', color: '#94a3b8', display: 'block', marginBottom: '6px' }}>PASSWORD</label>
@@ -274,7 +312,9 @@ const App = () => {
                                         <label style={{ fontSize: '10px', fontWeight: '700', color: '#94a3b8', display: 'block', marginBottom: '6px' }}>BUAT PASSWORD</label>
                                         <input type="password" value={regPassword} onChange={(e) => setRegPassword(e.target.value)} placeholder="Buat password..." required style={{ width: '100%', padding: '10px', backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#fff', boxSizing: 'border-box' }} />
                                     </div>
-                                    <button type="submit" style={{ backgroundColor: '#6366f1', color: '#fff', padding: '12px', borderRadius: '8px', border: 'none', fontWeight: '700', cursor: 'pointer' }}>Ajukan Relawan</button>
+                                    <button type="submit" disabled={loading} style={{ backgroundColor: '#6366f1', color: '#fff', padding: '12px', borderRadius: '8px', border: 'none', fontWeight: '700', cursor: 'pointer' }}>
+                                        {loading ? 'Mengirim ke Supabase...' : 'Ajukan Relawan'}
+                                    </button>
                                 </form>
                             )}
 
@@ -291,11 +331,11 @@ const App = () => {
                             )}
                         </div>
                     ) : (
-                        // FORM MENULIS KONTEN BERITA
+                        // RUANG KETIK KONTRIBUTOR TERVERIFIKASI
                         <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', padding: '24px', borderRadius: '16px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
                                 <h2 style={{ fontSize: '14px', fontWeight: '800', margin: 0 }}>✍️ RUANG REDAKSI KONTRIBUTOR</h2>
-                                <span style={{ fontSize: '10px', color: '#10b981', fontWeight: '700' }}>● Sesi Aktif</span>
+                                <span style={{ fontSize: '10px', color: '#10b981', fontWeight: '700' }}>● Sesi Aktif ({currentUser.name})</span>
                             </div>
                             <form onSubmit={handleCreateArticle} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                 <div>
@@ -316,7 +356,9 @@ const App = () => {
                                     <textarea rows="6" value={artContent} onChange={(e) => setArtContent(e.target.value)} placeholder="Ketik narasi berita lengkap..." required style={{ width: '100%', padding: '12px', backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#fff', marginTop: '6px', resize: 'none', boxSizing: 'border-box' }}></textarea>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'end' }}>
-                                    <button type="submit" style={{ backgroundColor: '#fff', color: '#0f172a', padding: '12px 24px', border: 'none', borderRadius: '8px', fontWeight: '700', cursor: 'pointer' }}>Ajukan Terbit</button>
+                                    <button type="submit" disabled={loading} style={{ backgroundColor: '#fff', color: '#0f172a', padding: '12px 24px', border: 'none', borderRadius: '8px', fontWeight: '700', cursor: 'pointer' }}>
+                                        {loading ? 'Mengirim...' : 'Ajukan Terbit'}
+                                    </button>
                                 </div>
                             </form>
                         </div>
@@ -326,10 +368,9 @@ const App = () => {
         );
     }
 
-    // VIEW 3: LANDING PAGE DEPAN
+    // TAMPILAN DEPAN UTAMA PUBLIC WEBSITE
     return (
         <div style={{ minHeight: '100vh', backgroundColor: '#0f172a', color: '#f8fafc', fontFamily: 'sans-serif', margin: 0, padding: 0 }}>
-            {/* Header */}
             <header style={{ borderBottom: '1px solid #1e293b', backgroundColor: '#0f172a', position: 'sticky', top: 0, zIndex: 50 }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
@@ -340,19 +381,17 @@ const App = () => {
                 </div>
             </header>
 
-            {/* Hero */}
             <section style={{ textAlign: 'center', padding: '60px 20px' }}>
                 <span style={{ fontSize: '11px', color: '#818cf8', border: '1px solid #334155', padding: '6px 12px', borderRadius: '20px', fontWeight: '600' }}>🛡️ DIVISI INFORMASI & TEKNOLOGI GLOBAL</span>
                 <h1 style={{ fontSize: '40px', fontWeight: '950', color: '#fff', marginTop: '20px' }}>Navigasi Masa Depan</h1>
                 <p style={{ fontSize: '28px', fontWeight: '900', background: 'linear-gradient(to right, #818cf8, #c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0 }}>Ekosistem Media Siber Terintegrasi</p>
             </section>
 
-            {/* Grid Konten */}
             <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px 80px 20px' }}>
                 <h2 style={{ fontSize: '12px', color: '#64748b', letterSpacing: '2px', borderBottom: '1px solid #1e293b', paddingBottom: '10px', marginBottom: '30px' }}>DIGITAL MEDIA NETWORK</h2>
                 <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginBottom: '40px' }}>
                     {mediaNetwork.map((item) => (
-                        <div key={item.name} style={{ flex: '1', minWidth: '280px', backgroundColor: '#1e293b', border: '1px solid #334155', padding: '24px', borderRadius: '16px', display: 'flex', flexDirection: 'column', justify: 'space-between' }}>
+                        <div key={item.name} style={{ flex: '1', minWidth: '280px', backgroundColor: '#1e293b', border: '1px solid #334155', padding: '24px', borderRadius: '16px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                             <div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                     <span style={{ fontSize: '24px' }}>{item.icon}</span>
